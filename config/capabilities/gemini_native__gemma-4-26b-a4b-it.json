@@ -7,7 +7,7 @@
   "probe_version": 1,
   "mode": "full",
   "repeats": 5,
-  "requests_used": 42,
+  "requests_used": 47,
   "settings": {
     "temperature": {
       "status": "honoured",
@@ -83,7 +83,11 @@
       "send_as": "native",
       "accepted": true,
       "value_none": "rejected: Invalid value at 'generation_config.thinking_config.thinking_level' (type.googleapis.com/google.ai.generativelanguage.v1beta.ThinkingConfig.ThinkingLevel), \"NONE\"",
-      "evidence": "reasoning tokens minimal=0 high=435; latency minimal=0.73s high=9.97s; answers '8' / '11'"
+      "levels_accepted": [
+        "minimal",
+        "high"
+      ],
+      "evidence": "reasoning tokens minimal=0 high=310; latency minimal=5.06s high=7.25s; answers '8' / '11'"
     }
   },
   "system_role": {
@@ -101,5 +105,13 @@
     "apple cloud wrench ocean jumps velvet lamp guitar",
     "apple cloud wrench bicycle ocean keyboard cactus pancake",
     "apple cloud wrench ocean lamp jump brick melody"
+  ],
+  "reprobed": [
+    {
+      "at": "2026-10-12T16:55:41+00:00",
+      "only": [
+        "reasoning_effort"
+      ]
+    }
   ]
 }

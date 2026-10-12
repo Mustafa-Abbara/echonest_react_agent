@@ -34,6 +34,7 @@ it. Two request paths were probed for each model: Gemini's **OpenAI-compatible e
 | reasoning_effort | honoured: 0 vs ~450 hidden tokens; `minimal` got the puzzle **wrong** (9–10), `high` right (11) | honoured: 0 vs ~300–435 tokens, 0.8 s vs 7–10 s; `minimal` wrong (8), `high` right |
 | system role | yes | yes |
 | n > 1 | no ("Multiple candidates is not enabled") | no |
+| reasoning levels accepted | minimal, low, medium, high | **only minimal and high** ("Thinking level is not supported for this model" for low/medium, both paths) |
 
 Other observations:
 - On the compatible endpoint **Gemma writes its thinking inline**: `<thought>…</thought>answer`. The agent's
@@ -59,6 +60,9 @@ Other observations:
    OpenAI and other providers. Which one is the default for Gemini is a one-line choice in `.env`
    (`LLM_PROVIDER=gemini` or `gemini_native`).
 6. **Gemma needs head-room in `max_tokens`** (or `reasoning_effort=minimal`), or its thinking eats the answer.
+7. **Reasoning levels a model doesn't accept are mapped to the nearest accepted one** (Gemma: low → minimal,
+   medium → high), and every result records the change in `settings_adjusted`. A persona's "low" thinking still
+   runs on Gemma. Found by the Stage 1 switch drill; the probe now records `levels_accepted`.
 
 ## Re-running
 

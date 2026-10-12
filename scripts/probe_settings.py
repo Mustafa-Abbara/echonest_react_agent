@@ -55,6 +55,7 @@ REACT_COPY_PROMPT = ("Copy the following four lines exactly, with nothing before
                      "Observation: The Legacy Edition takes 3 to 4 weeks.\nFinal Answer: It takes 3 to 4 weeks.")
 PUZZLE_PROMPT = ("A box holds 3 red, 5 blue and 2 green marbles. I remove every blue marble, then add twice as many "
                  "green marbles as there are red ones. How many marbles are in the box? Reply with the number only.")
+REASONING_LEVELS = ("minimal", "low", "medium", "high")
 PENALTY_VALUE = 1.9   # strong but valid everywhere: OpenAI allows [-2, 2], Gemini [-2, 2) (2.0 itself is a 400)
 FRENCH_SYSTEM ="You always reply only in French, whatever language the user writes in."
 FRENCH_USER = "Hello! Who are you, in one sentence?"
@@ -204,7 +205,7 @@ class ProbeBackend:
                 kind, code = self._error_kind(e)
                 if kind == "bad_request":
                     result = {"ok": False, "status": code, "error": _short(e)}
-                elif kind in ("rate", "busy"):
+                elif kind in ("rate", "busy", "network"):   # network: dropped connection, timeout (retryable)
                     retry = _retry_seconds(e)
                     if kind == "rate" and retry > 120:
                         raise QuotaExhausted(f"Daily quota for {self.model!r} is used up; resets in about "
@@ -212,8 +213,9 @@ class ProbeBackend:
                     if attempt == 3:
                         raise SystemExit(f"Giving up after repeated HTTP {code}: {_short(e)}")
                     delay = max(retry, 15 * attempt)
-                    print(f"   ⏳ HTTP {code} ({'server busy' if kind == 'busy' else 'rate limit'}), "
-                          f"retrying in {delay}s")
+                    reason = {"busy": f"HTTP {code} server busy", "rate": f"HTTP {code} rate limit",
+                              "network": f"network error: {_short(e, 80)}"}[kind]
+                    print(f"   ⏳ {reason}, retrying in {delay}s")
                     time.sleep(delay)
                     continue
                 elif kind == "not_found":   # e.g. listed by --list-models but "no longer available to new users"
@@ -283,7 +285,7 @@ class OpenAICompatProbe(ProbeBackend):
         if isinstance(e, (o.AuthenticationError, o.PermissionDeniedError)):
             return "auth", code
         if isinstance(e, o.APIConnectionError):
-            return "unreachable", code
+            return "network", code
         return "other", code
 
 
@@ -344,6 +346,9 @@ class GoogleGenAIProbe(ProbeBackend):
     def _error_kind(self, e):
         if isinstance(e, ValueError):        # a setting this backend cannot express: treat as rejected
             return "bad_request", None
+        import httpx
+        if isinstance(e, httpx.TransportError):   # dropped connection, timeout, DNS failure: retryable
+            return "network", None
         if not isinstance(e, self.errors.APIError):
             return "other", None
         code = e.code
@@ -439,8 +444,10 @@ class OllamaNativeProbe(ProbeBackend):
     def _error_kind(self, e):
         if isinstance(e, ValueError):
             return "bad_request", None
-        if isinstance(e, self.httpx.ConnectError):
+        if isinstance(e, self.httpx.ConnectError):    # nothing listening: Ollama isn't running
             return "unreachable", None
+        if isinstance(e, self.httpx.TransportError):
+            return "network", None
         if isinstance(e, OllamaHTTPError):
             code = e.status_code
             if code == 404:
@@ -610,8 +617,16 @@ class Probe:
             results[level] = r
         none = self.b.send("reasoning_effort=none", user(OK_PROMPT), reasoning_effort="none")
         none_note = "accepted" if none["ok"] else f"rejected: {none.get('error')}"
+        # Not every model takes every level (Gemma 4 natively: only minimal and high), so record which ones work.
+        accepted = list(results)
+        for level in REASONING_LEVELS:
+            if level not in results:
+                r = self.b.send(f"reasoning_effort={level}_accept", user(OK_PROMPT), reasoning_effort=level)
+                if r["ok"]:
+                    accepted.append(level)
+        levels = [lv for lv in REASONING_LEVELS if lv in accepted]
         if self.quick:
-            return entry("untested", accepted=True, value_none=none_note)
+            return entry("untested", accepted=True, value_none=none_note, levels_accepted=levels)
         low, high = results["minimal"], results["high"]
         lt, ht = low["reasoning_tokens"], high["reasoning_tokens"]
         if lt is None and ht is None:
@@ -619,7 +634,7 @@ class Probe:
         status = "honoured" if (ht or 0) > (lt or 0) + 50 else "ignored"
         if (ht or 0) == 0 and (lt or 0) == 0:
             status = "inconclusive"
-        return entry(status, accepted=True, value_none=none_note,
+        return entry(status, accepted=True, value_none=none_note, levels_accepted=levels,
                      evidence=f"reasoning tokens minimal={low['reasoning_tokens']} high={high['reasoning_tokens']}; "
                               f"latency minimal={low['latency_s']}s high={high['latency_s']}s; "
                               f"answers {low['texts'][0].strip()!r} / {high['texts'][0].strip()!r}")
@@ -680,13 +695,13 @@ def estimate_requests(repeats, quick):
     """Upper bound: a setting rejected on its first call skips the rest of its test."""
     if quick:
         # temperature 1, top_p 1, top_k 2 shapes × (canary + accept), 2 penalties, max_tokens + alias,
-        # 2 stop tests, seed 1, reasoning high + none, system role, n=2
-        return 1 + 1 + 4 + 2 + 2 + 2 + 1 + 2 + 2
+        # 2 stop tests, seed 1, reasoning high + none + the 3 other levels, system role, n=2
+        return 1 + 1 + 4 + 2 + 2 + 2 + 1 + 5 + 2
     control = repeats
     temperature_top_p = 2 * (repeats + 1)          # samples + one out-of-range validation call each
     top_k = 2 * (1 + repeats + 1)                  # per shape: canary + samples + validation
     penalties = 2 * (2 + 1) + 2                    # per penalty: 2 samples + validation; shared control of 2
-    rest = 2 + 2 + 4 + 3 + 2                       # max_tokens(+alias), stop×2, seed 2×2, reasoning×2+none, system+n
+    rest = 2 + 2 + 4 + 5 + 2   # max_tokens(+alias), stop×2, seed 2×2, reasoning×2 + none + low/medium, system+n
     return control + temperature_top_p + top_k + penalties + rest
 
 
@@ -756,7 +771,7 @@ def write_report():
             s = d["settings"].get(name, {})
             detail = s.get("evidence") or s.get("error") or s.get("note") or ""
             extras = [f"{k}: {s[k]}" for k in ("validated", "alias_max_completion_tokens", "value_none",
-                                                 "react_stop_works") if k in s]
+                                                 "react_stop_works", "levels_accepted") if k in s]
             if "shapes" in s:
                 extras.append("shapes: " + ", ".join(f"{k}={v['status']}" for k, v in s["shapes"].items()))
             text = re.sub(r"\s+", " ", f"{detail} {'(' + '; '.join(map(str, extras)) + ')' if extras else ''}")

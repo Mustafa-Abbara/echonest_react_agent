@@ -7,7 +7,7 @@
   "probe_version": 1,
   "mode": "full",
   "repeats": 5,
-  "requests_used": 38,
+  "requests_used": 43,
   "settings": {
     "temperature": {
       "status": "ignored",
@@ -85,7 +85,13 @@
       "send_as": "top_level",
       "accepted": true,
       "value_none": "rejected: Error code: 400 - [{'error': {'code': 400, 'message': 'Request contains an invalid argument.', 'status': 'INVALID_ARGUMENT'}}]",
-      "evidence": "reasoning tokens minimal=0 high=392; latency minimal=0.69s high=1.44s; answers '9' / '11'"
+      "levels_accepted": [
+        "minimal",
+        "low",
+        "medium",
+        "high"
+      ],
+      "evidence": "reasoning tokens minimal=0 high=479; latency minimal=2.16s high=11.91s; answers '10' / '11'"
     }
   },
   "system_role": {
@@ -109,6 +115,12 @@
       "only": [
         "frequency_penalty",
         "presence_penalty",
+        "reasoning_effort"
+      ]
+    },
+    {
+      "at": "2026-10-12T16:54:20+00:00",
+      "only": [
         "reasoning_effort"
       ]
     }

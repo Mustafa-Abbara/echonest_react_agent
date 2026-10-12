@@ -7,7 +7,7 @@
   "probe_version": 1,
   "mode": "full",
   "repeats": 5,
-  "requests_used": 37,
+  "requests_used": 42,
   "settings": {
     "temperature": {
       "status": "honoured",
@@ -86,7 +86,11 @@
       "send_as": "top_level",
       "accepted": true,
       "value_none": "rejected: Error code: 400 - [{'error': {'code': 400, 'message': 'Thinking budget is not supported for this model.', 'status': 'INVALID_ARGUMENT'}}]",
-      "evidence": "reasoning tokens minimal=0 high=304; latency minimal=0.81s high=7.22s; answers '8' / '11'"
+      "levels_accepted": [
+        "minimal",
+        "high"
+      ],
+      "evidence": "reasoning tokens minimal=0 high=335; latency minimal=3.0s high=7.88s; answers '8' / '11'"
     }
   },
   "system_role": {
@@ -110,6 +114,12 @@
       "at": "2026-10-12T15:36:22+00:00",
       "only": [
         "stop"
+      ]
+    },
+    {
+      "at": "2026-10-12T16:56:09+00:00",
+      "only": [
+        "reasoning_effort"
       ]
     }
   ]

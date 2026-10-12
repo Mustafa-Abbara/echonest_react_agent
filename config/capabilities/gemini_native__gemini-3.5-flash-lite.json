@@ -7,7 +7,7 @@
   "probe_version": 1,
   "mode": "full",
   "repeats": 5,
-  "requests_used": 38,
+  "requests_used": 43,
   "settings": {
     "temperature": {
       "status": "ignored",
@@ -83,7 +83,13 @@
       "send_as": "native",
       "accepted": true,
       "value_none": "rejected: Invalid value at 'generation_config.thinking_config.thinking_level' (type.googleapis.com/google.ai.generativelanguage.v1beta.ThinkingConfig.ThinkingLevel), \"NONE\"",
-      "evidence": "reasoning tokens minimal=0 high=476; latency minimal=0.53s high=1.58s; answers '9' / '11'"
+      "levels_accepted": [
+        "minimal",
+        "low",
+        "medium",
+        "high"
+      ],
+      "evidence": "reasoning tokens minimal=0 high=294; latency minimal=2.34s high=4.94s; answers '10' / '11'"
     }
   },
   "system_role": {
@@ -101,5 +107,13 @@
     "bracket cushion marvel lantern puzzle gentle turbine socket",
     "lantern bridge velvet pebble guitar whisper compass anchor",
     "lantern bicycle velvet mountain whisper cactus trumpet ocean"
+  ],
+  "reprobed": [
+    {
+      "at": "2026-10-12T16:53:42+00:00",
+      "only": [
+        "reasoning_effort"
+      ]
+    }
   ]
 }

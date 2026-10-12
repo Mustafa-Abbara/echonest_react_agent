@@ -4,6 +4,16 @@
 
 EECE 503P/798S (Agentic Systems), Assignment C3: an agent-powered business assistant.
 
+> **Assignment C4 (ReAct agent with personas) is being built in this repo.** Until the README is rewritten
+> (Roadmap Stage 10), the A4 parts are:
+> - **Which settings each model honours** (measured, not assumed): [docs/stage0_findings.md](docs/stage0_findings.md)
+>   and [docs/settings_support.md](docs/settings_support.md).
+> - **Switching the model or provider is configuration only.** Edit two lines of `.env` (see `.env.example`):
+>   `LLM_PROVIDER` / `LLM_MODEL`, from [config/models.json](config/models.json). For a model not listed yet, add it
+>   there and measure it once with `python scripts/probe_settings.py --provider <p> --model <m>`. Check with
+>   `python scripts/smoke_llm.py`. Only `echonest_agent/config.py` and `echonest_agent/llm.py` know about providers;
+>   `tests/test_llm.py` fails if provider code appears anywhere else.
+
 Milo represents **EchoNest**, a fictional digital-memory studio. He answers questions from the business documents,
 routes every message (general / lead / feedback), collects leads, logs unanswered questions and feedback through tool
 calls, checks his own replies before sending them, and runs as a Gradio chat. The LLM is Gemini (free tier) through the
