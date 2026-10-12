@@ -80,19 +80,24 @@ def numbers_in(text):
     return [int(n) for n in re.findall(r"\d+", text or "")]
 
 
-THOUGHT_RE = re.compile(r"^\s*<thought>(.*?)(?:</thought>|$)", re.S)
+THOUGHT_RE = re.compile(r"^\s*<(thought|think)>(.*?)(?:</\1>|$)", re.S)
 
 
 def split_thought(text):
-    """Some models (Gemma 4) write their thinking inline: '<thought>...</thought>answer'.
-    Returns (thought or None, answer). An unclosed <thought> (cut by max_tokens/stop) is all thought."""
+    """Some models write their thinking inline: Gemma 4 '<thought>...</thought>answer', Qwen 3 '<think>...</think>'.
+    Returns (thought or None, answer). An unclosed tag (cut by max_tokens/stop) is all thought."""
     m = THOUGHT_RE.match(text or "")
     if not m:
         return None, text or ""
-    return m.group(1), (text or "")[m.end():]
+    return m.group(2), (text or "")[m.end():].lstrip("\n")
 
 
-FRENCH_MARKERS =("je", "suis", "bonjour", "vous", "un", "une", "le", "la", "les", "et", "est", "votre", "assistant")
+def safe_name(text):
+    """Model IDs such as 'qwen3:8b' contain characters Windows forbids in file names."""
+    return re.sub(r'[<>:"/\\|?*]', "_", text)
+
+
+FRENCH_MARKERS = ("je", "suis", "bonjour", "vous", "un", "une", "le", "la", "les", "et", "est", "votre", "assistant")
 
 
 def looks_french(text):
@@ -140,6 +145,8 @@ def load_config(provider, model):
 
 
 def load_key(key_env):
+    if not key_env:            # local servers such as Ollama need no key (the openai SDK still wants a string)
+        return "not-needed"
     try:
         from dotenv import find_dotenv, load_dotenv
         load_dotenv(find_dotenv(usecwd=True))
@@ -213,6 +220,9 @@ class ProbeBackend:
                     raise SystemExit(f"Model {self.model!r} not found (HTTP 404): {_short(e)}") from None
                 elif kind == "auth":
                     raise SystemExit(f"Key rejected (HTTP {code}): {_short(e)}") from None
+                elif kind == "unreachable":   # e.g. a local Ollama server that isn't running
+                    raise SystemExit(f"Cannot reach the server for {self.model!r}: {_short(e)}. "
+                                     "If it is a local Ollama model, start Ollama and try again.") from None
                 else:
                     raise
             result["latency_s"] = round(time.monotonic() - started, 2)
@@ -272,6 +282,8 @@ class OpenAICompatProbe(ProbeBackend):
             return "not_found", code
         if isinstance(e, (o.AuthenticationError, o.PermissionDeniedError)):
             return "auth", code
+        if isinstance(e, o.APIConnectionError):
+            return "unreachable", code
         return "other", code
 
 
@@ -364,8 +376,84 @@ def _short(error, limit=300):
     return re.sub(r"\s+", " ", text)[:limit]
 
 
+class OllamaHTTPError(Exception):
+    def __init__(self, status_code, text):
+        super().__init__(f"HTTP {status_code}: {text}")
+        self.status_code = status_code
+        self.message = text
+
+
+class OllamaNativeProbe(ProbeBackend):
+    """A local model through Ollama's own /api/chat. Its `options` carry sampling fields that Ollama's
+    OpenAI-compatible endpoint does not list, notably top_k. Thinking models (Qwen 3) return their reasoning in
+    message.thinking when `think` is set; otherwise it may appear inline as <think>...</think>."""
+    default_send_as = "native"
+    top_k_shapes = {"native": lambda value: {"top_k": value}}
+    canary_shapes = {"native": {"zz_probe_canary": 1}}   # an unknown key inside `options`
+    OPTION = {"temperature": "temperature", "top_p": "top_p", "top_k": "top_k", "seed": "seed",
+              "frequency_penalty": "frequency_penalty", "presence_penalty": "presence_penalty",
+              "max_tokens": "num_predict", "max_completion_tokens": "num_predict", "stop": "stop",
+              "zz_probe_canary": "zz_probe_canary"}
+
+    def __init__(self, provider_cfg, model, rpm, log_path):
+        super().__init__(provider_cfg, model, rpm, log_path)
+        import httpx                       # installed with the openai SDK
+        self.httpx = httpx
+        self.base_url = provider_cfg["base_url"].rstrip("/")
+        self.http = httpx.Client(timeout=300)
+
+    def list_models(self):
+        r = self.http.get(f"{self.base_url}/api/tags")
+        r.raise_for_status()
+        return sorted(m["name"] for m in r.json()["models"])
+
+    def build_body(self, messages, params):
+        unknown = set(params) - set(self.OPTION) - {"reasoning_effort", "n"}
+        if unknown:
+            raise ValueError(f"Ollama native backend cannot send {sorted(unknown)}")
+        if params.get("n", 1) > 1:
+            raise ValueError("Ollama returns one reply per request (no n > 1)")
+        body = {"model": self.model, "messages": messages, "stream": False,
+                "options": {self.OPTION[k]: v for k, v in params.items() if k in self.OPTION}}
+        if "reasoning_effort" in params:   # Qwen 3 thinking is on/off: minimal/none = off, anything else = on
+            body["think"] = params["reasoning_effort"] not in ("minimal", "none")
+        return body
+
+    def _request(self, messages, params):
+        r = self.http.post(f"{self.base_url}/api/chat", json=self.build_body(messages, params))
+        if r.status_code >= 400:
+            raise OllamaHTTPError(r.status_code, r.text)
+        return self.parse_reply(r.json())
+
+    @staticmethod
+    def parse_reply(data):
+        msg = data.get("message") or {}
+        thinking = msg.get("thinking") or ""
+        prompt, completion = data.get("prompt_eval_count"), data.get("eval_count")
+        usage = {"prompt_tokens": prompt, "completion_tokens": completion,
+                 "total_tokens": (prompt or 0) + (completion or 0),
+                 # Ollama doesn't split out thinking tokens; estimate them from the text (~4 characters/token)
+                 "completion_tokens_details": {"reasoning_tokens": round(len(thinking) / 4)}}
+        return [msg.get("content") or ""], data.get("done_reason"), usage
+
+    def _error_kind(self, e):
+        if isinstance(e, ValueError):
+            return "bad_request", None
+        if isinstance(e, self.httpx.ConnectError):
+            return "unreachable", None
+        if isinstance(e, OllamaHTTPError):
+            code = e.status_code
+            if code == 404:
+                return "not_found", code
+            if code >= 500:
+                return "busy", code
+            return "bad_request", code
+        return "other", None
+
+
 def make_backend(provider_cfg, model, rpm, log_path):
-    backends = {"openai_compat": OpenAICompatProbe, "google_genai": GoogleGenAIProbe}
+    backends = {"openai_compat": OpenAICompatProbe, "google_genai": GoogleGenAIProbe,
+                "ollama_native": OllamaNativeProbe}
     if provider_cfg["backend"] not in backends:
         raise SystemExit(f"Unknown backend {provider_cfg['backend']!r}; known: {sorted(backends)}")
     return backends[provider_cfg["backend"]](provider_cfg, model, rpm, log_path)
@@ -713,7 +801,7 @@ def main(argv=None):
         ap.error("--model is required unless --list-models is given")
 
     mode = "quick" if args.quick else "full"
-    out = CAPABILITIES_DIR / f"{args.provider}__{args.model}.json"
+    out = CAPABILITIES_DIR / f"{args.provider}__{safe_name(args.model)}.json"
     if only and not out.exists():
         ap.error(f"--only needs an existing {out.relative_to(ROOT)}: run the full probe first")
     estimate = f"at most {estimate_requests(args.repeats, args.quick)}" if not only else "a few"
@@ -725,7 +813,7 @@ def main(argv=None):
 
     PROBE_LOG_DIR.mkdir(parents=True, exist_ok=True)
     CAPABILITIES_DIR.mkdir(parents=True, exist_ok=True)
-    log_path = PROBE_LOG_DIR / f"{args.provider}__{args.model}__{datetime.now():%Y-%m-%d}.jsonl"
+    log_path = PROBE_LOG_DIR / f"{args.provider}__{safe_name(args.model)}__{datetime.now():%Y-%m-%d}.jsonl"
     backend = make_backend(provider_cfg, args.model, rpm, log_path)
     probe = Probe(backend, args.repeats, args.quick)
     probe.run(only)

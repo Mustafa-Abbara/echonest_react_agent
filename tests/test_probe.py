@@ -71,6 +71,37 @@ def test_split_thought():
     assert ps.split_thought("plain answer") == (None, "plain answer")
     assert ps.split_thought("I had a <thought> mid-sentence") == (None, "I had a <thought> mid-sentence")
     assert ps.split_thought(None) == (None, "")
+    assert ps.split_thought("<think>\nhmm\n</think>\n\nanswer") == ("\nhmm\n", "answer")   # Qwen 3 style
+    assert ps.split_thought("<think>a</thought>b") == ("a</thought>b", "")                  # tags must match
+
+
+def test_safe_name_and_keyless_providers():
+    assert ps.safe_name("qwen3:8b") == "qwen3_8b"
+    assert ps.safe_name("gemini-3.5-flash-lite") == "gemini-3.5-flash-lite"
+    assert ps.load_key(None) == "not-needed"
+
+
+def test_ollama_native_request_and_reply_mapping():
+    backend = ps.OllamaNativeProbe.__new__(ps.OllamaNativeProbe)
+    backend.model = "qwen3:8b"
+    body = backend.build_body([{"role": "user", "content": "hi"}],
+                              {"temperature": 0.0, "top_k": 1, "max_tokens": 16, "stop": ["7"], "seed": 42,
+                               "presence_penalty": 1.9, "reasoning_effort": "minimal"})
+    assert body["options"] == {"temperature": 0.0, "top_k": 1, "num_predict": 16, "stop": ["7"], "seed": 42,
+                               "presence_penalty": 1.9}, body["options"]
+    assert body["think"] is False and body["stream"] is False
+    assert backend.build_body([], {"reasoning_effort": "high"})["think"] is True
+    for bad in ({"extra_body": {"top_k": 1}}, {"n": 2}):
+        try:
+            backend.build_body([], bad)
+            raise AssertionError(f"{bad} should be refused")
+        except ValueError:
+            pass
+    texts, finish, usage = ps.OllamaNativeProbe.parse_reply(
+        {"message": {"content": "1, 2", "thinking": "x" * 400}, "done_reason": "length",
+         "prompt_eval_count": 10, "eval_count": 120})
+    assert texts == ["1, 2"] and finish == "length"
+    assert usage["total_tokens"] == 130 and ps._reasoning_tokens(usage) == 100
 
 
 def test_retry_seconds():

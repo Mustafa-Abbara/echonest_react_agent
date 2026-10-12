@@ -1,5 +1,5 @@
 {
-  "_about": "Providers and models the agent can use. The active one is chosen in .env (LLM_PROVIDER, LLM_MODEL). To add a model: add an entry under 'models', then run scripts/probe_settings.py to write its capability file. rpm/rpd = requests per minute/day (null = no known limit; the probe then paces at DEFAULT_RPM).",
+  "_about": "Providers and models the agent can use. The active one is chosen in .env (LLM_PROVIDER, LLM_MODEL). To add a model: add an entry under 'models', then run scripts/probe_settings.py to write its capability file. rpm/rpd = requests per minute/day (null = no known limit; the probe then paces at DEFAULT_RPM). key_env null = no key needed (local Ollama). local = runs on this machine through Ollama (ollama pull <model>).",
   "providers": {
     "gemini": {
       "backend": "openai_compat",
@@ -15,10 +15,21 @@
       "backend": "openai_compat",
       "base_url": null,
       "key_env": "OPENAI_API_KEY"
+    },
+    "ollama": {
+      "backend": "openai_compat",
+      "base_url": "http://localhost:11434/v1/",
+      "key_env": null
+    },
+    "ollama_native": {
+      "backend": "ollama_native",
+      "base_url": "http://localhost:11434",
+      "key_env": null
     }
   },
   "models": {
     "gemini-3.5-flash-lite": {"providers": ["gemini", "gemini_native"], "rpm": 15, "rpd": 500},    "gemma-4-26b-a4b-it": {"providers": ["gemini", "gemini_native"], "rpm": null, "rpd": null},
-    "gemma-4-31b-it": {"providers": ["gemini", "gemini_native"], "rpm": null, "rpd": null}
+    "gemma-4-31b-it": {"providers": ["gemini", "gemini_native"], "rpm": null, "rpd": null},
+    "qwen3:8b": {"providers": ["ollama", "ollama_native"], "rpm": 600, "rpd": null, "local": true}
   }
 }
