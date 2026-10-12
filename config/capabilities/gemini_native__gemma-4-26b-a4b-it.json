@@ -1,0 +1,105 @@
+{
+  "_about": "Written by scripts/probe_settings.py. status: honoured | ignored | rejected | inconclusive | untested. send_as: how the LLM layer must send the setting. Re-run the probe to refresh.",
+  "provider": "gemini_native",
+  "backend": "google_genai",
+  "model": "gemma-4-26b-a4b-it",
+  "probed_at": "2026-10-12T15:43:54+00:00",
+  "probe_version": 1,
+  "mode": "full",
+  "repeats": 5,
+  "requests_used": 42,
+  "settings": {
+    "temperature": {
+      "status": "honoured",
+      "send_as": "native",
+      "accepted": true,
+      "validated": true,
+      "validation_error": "* GenerateContentRequest.generation_config.temperature: temperature must be in the range [0.0, 2.0]. ",
+      "evidence": "temperature=0.0: 1/5 distinct vs control 5/5"
+    },
+    "top_p": {
+      "status": "honoured",
+      "send_as": "native",
+      "accepted": true,
+      "validated": true,
+      "validation_error": "* GenerateContentRequest.generation_config.top_p: top_p must be in the range [0.0, 1.0]. ",
+      "evidence": "top_p=0.01: 1/5 distinct vs control 5/5"
+    },
+    "top_k": {
+      "status": "ignored",
+      "send_as": "native",
+      "accepted": true,
+      "validated": true,
+      "validation_error": "* GenerateContentRequest.generation_config.top_k: top_k must be nonnegative. ",
+      "evidence": "top_k=1: 5/5 distinct vs control 5/5",
+      "unknown_fields_rejected": null,
+      "shapes": {
+        "native": {
+          "status": "ignored",
+          "send_as": "native",
+          "accepted": true,
+          "validated": true,
+          "validation_error": "* GenerateContentRequest.generation_config.top_k: top_k must be nonnegative. ",
+          "evidence": "top_k=1: 5/5 distinct vs control 5/5",
+          "unknown_fields_rejected": null
+        }
+      }
+    },
+    "frequency_penalty": {
+      "status": "rejected",
+      "send_as": "native",
+      "accepted": false,
+      "error": "Penalty is not enabled for this model"
+    },
+    "presence_penalty": {
+      "status": "rejected",
+      "send_as": "native",
+      "accepted": false,
+      "error": "Penalty is not enabled for this model"
+    },
+    "max_tokens": {
+      "status": "honoured",
+      "send_as": "native",
+      "accepted": true,
+      "evidence": "finish_reason=length, 0 numbers written, completion_tokens=None, reasoning_tokens=13, empty_text=True",
+      "alias_max_completion_tokens": "accepted"
+    },
+    "stop": {
+      "status": "honoured",
+      "send_as": "native",
+      "accepted": true,
+      "evidence": "stop=['7'] → '1, 2, 3, 4, 5, 6,'; stop=['Observation:'] → 'Thought: I should look it up.\\nAction: search_business_docs'",
+      "react_stop_works": true,
+      "cut_inside_thought": false
+    },
+    "seed": {
+      "status": "honoured",
+      "send_as": "native",
+      "accepted": true,
+      "evidence": "pairs seed 42: ['desk moon turtle glue sand jacket piano grape', 'desk moon turtle glue sand jacket piano grape']; seed 7: ['apple cloud jump brick velvet ocean pencil glimmer', 'apple cloud jump brick velvet ocean pencil glimmer']"
+    },
+    "reasoning_effort": {
+      "status": "honoured",
+      "send_as": "native",
+      "accepted": true,
+      "value_none": "rejected: Invalid value at 'generation_config.thinking_config.thinking_level' (type.googleapis.com/google.ai.generativelanguage.v1beta.ThinkingConfig.ThinkingLevel), \"NONE\"",
+      "evidence": "reasoning tokens minimal=0 high=435; latency minimal=0.73s high=9.97s; answers '8' / '11'"
+    }
+  },
+  "system_role": {
+    "supported": true,
+    "evidence": "Je suis une intelligence artificielle conçue pour vous aider et répondre à vos questions."
+  },
+  "n_greater_than_1": {
+    "supported": false,
+    "error": "Multiple candidates is not enabled for this model"
+  },
+  "thought_inline": false,
+  "control_samples": [
+    "keyboard forest yellow spoon mountain dance clock bread",
+    "apple cloud jump pencil ocean keyboard green mountain",
+    "apple cloud wrench ocean jumps velvet lamp guitar",
+    "apple cloud wrench bicycle ocean keyboard cactus pancake",
+    "apple cloud wrench ocean lamp jump brick melody"
+  ]
+}

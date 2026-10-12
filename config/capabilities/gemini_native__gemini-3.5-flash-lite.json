@@ -1,0 +1,105 @@
+{
+  "_about": "Written by scripts/probe_settings.py. status: honoured | ignored | rejected | inconclusive | untested. send_as: how the LLM layer must send the setting. Re-run the probe to refresh.",
+  "provider": "gemini_native",
+  "backend": "google_genai",
+  "model": "gemini-3.5-flash-lite",
+  "probed_at": "2026-10-12T15:41:22+00:00",
+  "probe_version": 1,
+  "mode": "full",
+  "repeats": 5,
+  "requests_used": 38,
+  "settings": {
+    "temperature": {
+      "status": "ignored",
+      "send_as": "native",
+      "accepted": true,
+      "validated": true,
+      "validation_error": "* GenerateContentRequest.generation_config.temperature: temperature must be in the range [0.0, 2.0]. ",
+      "evidence": "temperature=0.0: 5/5 distinct vs control 5/5"
+    },
+    "top_p": {
+      "status": "ignored",
+      "send_as": "native",
+      "accepted": true,
+      "validated": true,
+      "validation_error": "* GenerateContentRequest.generation_config.top_p: top_p must be in the range [0.0, 1.0]. ",
+      "evidence": "top_p=0.01: 5/5 distinct vs control 5/5"
+    },
+    "top_k": {
+      "status": "ignored",
+      "send_as": "native",
+      "accepted": true,
+      "validated": true,
+      "validation_error": "* GenerateContentRequest.generation_config.top_k: top_k must be nonnegative. ",
+      "evidence": "top_k=1: 5/5 distinct vs control 5/5",
+      "unknown_fields_rejected": null,
+      "shapes": {
+        "native": {
+          "status": "ignored",
+          "send_as": "native",
+          "accepted": true,
+          "validated": true,
+          "validation_error": "* GenerateContentRequest.generation_config.top_k: top_k must be nonnegative. ",
+          "evidence": "top_k=1: 5/5 distinct vs control 5/5",
+          "unknown_fields_rejected": null
+        }
+      }
+    },
+    "frequency_penalty": {
+      "status": "rejected",
+      "send_as": "native",
+      "accepted": false,
+      "error": "Penalty is not enabled for this model"
+    },
+    "presence_penalty": {
+      "status": "rejected",
+      "send_as": "native",
+      "accepted": false,
+      "error": "Penalty is not enabled for this model"
+    },
+    "max_tokens": {
+      "status": "honoured",
+      "send_as": "native",
+      "accepted": true,
+      "evidence": "finish_reason=length, 6 numbers written, completion_tokens=12, reasoning_tokens=0, empty_text=False",
+      "alias_max_completion_tokens": "accepted"
+    },
+    "stop": {
+      "status": "honoured",
+      "send_as": "native",
+      "accepted": true,
+      "evidence": "stop=['7'] → '1, 2, 3, 4, 5, 6,'; stop=['Observation:'] → 'Thought: I should look it up.\\nAction: search_business_docs'",
+      "react_stop_works": true,
+      "cut_inside_thought": false
+    },
+    "seed": {
+      "status": "honoured",
+      "send_as": "native",
+      "accepted": true,
+      "evidence": "pairs seed 42: ['basket blanket window guitar pebble shadow orange bicycle', 'basket blanket window guitar pebble shadow orange bicycle']; seed 7: ['basket triangle guitar whisper ocean shadow feather planet', 'basket triangle guitar whisper ocean shadow feather planet']"
+    },
+    "reasoning_effort": {
+      "status": "honoured",
+      "send_as": "native",
+      "accepted": true,
+      "value_none": "rejected: Invalid value at 'generation_config.thinking_config.thinking_level' (type.googleapis.com/google.ai.generativelanguage.v1beta.ThinkingConfig.ThinkingLevel), \"NONE\"",
+      "evidence": "reasoning tokens minimal=0 high=476; latency minimal=0.53s high=1.58s; answers '9' / '11'"
+    }
+  },
+  "system_role": {
+    "supported": true,
+    "evidence": "Je suis un modèle linguistique d'intelligence artificielle, conçu pour vous aider à répondre à vos questions et à rédiger des textes en français."
+  },
+  "n_greater_than_1": {
+    "supported": false,
+    "error": "Multiple candidates is not enabled for this model"
+  },
+  "thought_inline": false,
+  "control_samples": [
+    "anchor velvet bicycle dolphin lantern trumpet marble cloud",
+    "lantern bicycle texture puzzle whisper orbit crayon marble",
+    "bracket cushion marvel lantern puzzle gentle turbine socket",
+    "lantern bridge velvet pebble guitar whisper compass anchor",
+    "lantern bicycle velvet mountain whisper cactus trumpet ocean"
+  ]
+}

@@ -1,0 +1,117 @@
+{
+  "_about": "Written by scripts/probe_settings.py. status: honoured | ignored | rejected | inconclusive | untested. send_as: how the LLM layer must send the setting. Re-run the probe to refresh.",
+  "provider": "gemini",
+  "backend": "openai_compat",
+  "model": "gemini-3.5-flash-lite",
+  "probed_at": "2026-10-12T15:28:37+00:00",
+  "probe_version": 1,
+  "mode": "full",
+  "repeats": 5,
+  "requests_used": 38,
+  "settings": {
+    "temperature": {
+      "status": "ignored",
+      "send_as": "top_level",
+      "accepted": true,
+      "validated": true,
+      "validation_error": "Error code: 400 - [{'error': {'code': 400, 'message': 'temperature must be in the range [0.0, 2.0] but was 5', 'status': 'INVALID_ARGUMENT'}}]",
+      "evidence": "temperature=0.0: 5/5 distinct vs control 5/5"
+    },
+    "top_p": {
+      "status": "ignored",
+      "send_as": "top_level",
+      "accepted": true,
+      "validated": true,
+      "validation_error": "Error code: 400 - [{'error': {'code': 400, 'message': 'top_p must be in the range [0.0, 1.0] but was 1.5', 'status': 'INVALID_ARGUMENT'}}]",
+      "evidence": "top_p=0.01: 5/5 distinct vs control 5/5"
+    },
+    "top_k": {
+      "status": "rejected",
+      "send_as": "top_level",
+      "accepted": false,
+      "error": "Error code: 400 - [{'error': {'code': 400, 'message': 'Invalid JSON payload received. Unknown name \"top_k\": Cannot find field.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.BadRequest', 'fieldViolations': [{'description': 'Invalid JSON payload received. Unknow",
+      "unknown_fields_rejected": true,
+      "shapes": {
+        "top_level": {
+          "status": "rejected",
+          "send_as": "top_level",
+          "accepted": false,
+          "error": "Error code: 400 - [{'error': {'code': 400, 'message': 'Invalid JSON payload received. Unknown name \"top_k\": Cannot find field.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.BadRequest', 'fieldViolations': [{'description': 'Invalid JSON payload received. Unknow",
+          "unknown_fields_rejected": true
+        },
+        "extra_body.google": {
+          "status": "rejected",
+          "send_as": "extra_body.google",
+          "accepted": false,
+          "error": "Error code: 400 - [{'error': {'code': 400, 'message': 'Invalid JSON payload received. Unknown name \"top_k\" at \\'extra_body.google\\': Cannot find field.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.BadRequest', 'fieldViolations': [{'field': 'extra_body.google'",
+          "unknown_fields_rejected": true
+        }
+      }
+    },
+    "frequency_penalty": {
+      "status": "rejected",
+      "send_as": "top_level",
+      "accepted": false,
+      "error": "Error code: 400 - [{'error': {'code': 400, 'message': 'Invalid JSON payload received. Unknown name \"frequency_penalty\": Cannot find field.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.BadRequest', 'fieldViolations': [{'description': 'Invalid JSON payload rece"
+    },
+    "presence_penalty": {
+      "status": "rejected",
+      "send_as": "top_level",
+      "accepted": false,
+      "error": "Error code: 400 - [{'error': {'code': 400, 'message': 'Penalty is not enabled for this model', 'status': 'INVALID_ARGUMENT'}}]"
+    },
+    "max_tokens": {
+      "status": "honoured",
+      "send_as": "top_level",
+      "accepted": true,
+      "evidence": "finish_reason=length, 6 numbers written, completion_tokens=12, reasoning_tokens=None, empty_text=False",
+      "alias_max_completion_tokens": "accepted"
+    },
+    "stop": {
+      "status": "honoured",
+      "send_as": "top_level",
+      "accepted": true,
+      "evidence": "stop=['7'] → '1, 2, 3, 4, 5, 6,'; stop=['Observation:'] → 'Thought: I should look it up.\\nAction: search_business_docs'",
+      "react_stop_works": true
+    },
+    "seed": {
+      "status": "rejected",
+      "send_as": "top_level",
+      "accepted": false,
+      "error": "Error code: 400 - [{'error': {'code': 400, 'message': 'Invalid JSON payload received. Unknown name \"seed\": Cannot find field.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.BadRequest', 'fieldViolations': [{'description': 'Invalid JSON payload received. Unknown"
+    },
+    "reasoning_effort": {
+      "status": "honoured",
+      "send_as": "top_level",
+      "accepted": true,
+      "value_none": "rejected: Error code: 400 - [{'error': {'code': 400, 'message': 'Request contains an invalid argument.', 'status': 'INVALID_ARGUMENT'}}]",
+      "evidence": "reasoning tokens minimal=0 high=392; latency minimal=0.69s high=1.44s; answers '9' / '11'"
+    }
+  },
+  "system_role": {
+    "supported": true,
+    "evidence": "Je suis un grand modèle de langage, conçu pour vous aider à répondre à vos questions et à accomplir diverses tâches textuelles."
+  },
+  "n_greater_than_1": {
+    "supported": false,
+    "error": "Error code: 400 - [{'error': {'code': 400, 'message': 'Multiple candidates is not enabled for this model', 'status': 'INVALID_ARGUMENT'}}]"
+  },
+  "control_samples": [
+    "lantern bicycle velvet anchor tomato whisper carpet dolphin",
+    "umbrella cushion tractor velvet bicycle lemon guitar magnet",
+    "lantern bicycle whisper velvet anchor oxygen pebble trumpet",
+    "umbrella bracket planet whisper carton feather lemon bicycle",
+    "bracket blanket cushion gentle melody pebble tether window"
+  ],
+  "reprobed": [
+    {
+      "at": "2026-10-12T15:30:02+00:00",
+      "only": [
+        "frequency_penalty",
+        "presence_penalty",
+        "reasoning_effort"
+      ]
+    }
+  ],
+  "thought_inline": false
+}

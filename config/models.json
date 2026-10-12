@@ -1,0 +1,24 @@
+{
+  "_about": "Providers and models the agent can use. The active one is chosen in .env (LLM_PROVIDER, LLM_MODEL). To add a model: add an entry under 'models', then run scripts/probe_settings.py to write its capability file. rpm/rpd = requests per minute/day (null = no known limit; the probe then paces at DEFAULT_RPM).",
+  "providers": {
+    "gemini": {
+      "backend": "openai_compat",
+      "base_url": "https://generativelanguage.googleapis.com/v1beta/openai/",
+      "key_env": "GEMINI_API_KEY"
+    },
+    "gemini_native": {
+      "backend": "google_genai",
+      "base_url": null,
+      "key_env": "GEMINI_API_KEY"
+    },
+    "openai": {
+      "backend": "openai_compat",
+      "base_url": null,
+      "key_env": "OPENAI_API_KEY"
+    }
+  },
+  "models": {
+    "gemini-3.5-flash-lite": {"providers": ["gemini", "gemini_native"], "rpm": 15, "rpd": 500},    "gemma-4-26b-a4b-it": {"providers": ["gemini", "gemini_native"], "rpm": null, "rpd": null},
+    "gemma-4-31b-it": {"providers": ["gemini", "gemini_native"], "rpm": null, "rpd": null}
+  }
+}
