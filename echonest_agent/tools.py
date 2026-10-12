@@ -178,6 +178,12 @@ def describe_tools(names=None):
     return "\n\n".join(blocks)
 
 
+def tool_arguments():
+    """{tool name: argument names, required first}: what react_parser.parse_react() needs to check tool names and
+    to accept a bare value for one-argument tools (Action: get_package("Legacy Edition"))."""
+    return {t.name: list(t.required) + [a for a in t.inputs if a not in t.required] for t in TOOLS.values()}
+
+
 def safe_execute(name, args):
     """Run the tool the model asked for. Returns the observation text; never raises.
     `args` may be a dict or a JSON string (as parsed from the model's Action Input)."""
