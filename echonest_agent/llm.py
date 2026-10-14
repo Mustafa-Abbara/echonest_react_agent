@@ -223,7 +223,9 @@ class GoogleGenAIBackend:
         except ImportError:
             raise ConfigError("LLM_PROVIDER uses google-genai: pip install -r requirements.txt") from None
         self.types, self.errors = types, errors
-        self.client = genai.Client(api_key=profile.api_key())
+        # a timeout, or one stalled request hangs the agent (seen in the Stage 4 live run); it counts as a network
+        # error, so complete() retries it
+        self.client = genai.Client(api_key=profile.api_key(), http_options=types.HttpOptions(timeout=120_000))
 
     def can_express(self, name, entry):
         return name in self.FIELD or name == "reasoning_effort"

@@ -15,7 +15,7 @@ Thought: <one or two sentences: what you know so far and what you need next>
 Action: <the name of one tool from the list above>
 Action Input: <a JSON object with that tool's inputs>
 
-Then stop. The system runs the tool and sends you its result in a message that starts with "Observation:".
+Then stop. The system runs the tool and writes its result under your step, on a line starting with "Observation:".
 Never write an Observation yourself.
 
 To reply to the customer:
@@ -30,7 +30,7 @@ To use a tool:
 Action: <the name of one tool from the list above>
 Action Input: <a JSON object with that tool's inputs>
 
-Then stop. The system runs the tool and sends you its result in a message that starts with "Observation:".
+Then stop. The system runs the tool and writes its result under your step, on a line starting with "Observation:".
 Never write an Observation yourself.
 
 To reply to the customer:
@@ -62,8 +62,11 @@ def format_spec(cot=True):
     return FORMAT_WITH_COT if cot else FORMAT_WITHOUT_COT
 
 
+CONTINUE_MESSAGE = "Continue with your next step: an Action, or your Final Answer."
+
+
 def observation_message(observation):
-    """How a tool result goes back to the model: a user-role message, because the text protocol has no tool role."""
+    """How a tool result goes back to the model: a line under its own step in the scratchpad (see graph.py)."""
     return f"Observation: {observation}"
 
 

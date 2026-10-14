@@ -51,10 +51,21 @@ def test_action_then_final_answer():
     assert nodes(result) == ["reason", "act", "reason", "finalize"], nodes(result)
     assert result.answer == "It takes 3 to 4 weeks." and result.outcome == "final" and result.steps == 2
     assert result.tool_calls == [("get_package", {"name": "Legacy Edition"})]
-    second = llm.calls[1]["messages"]                      # the observation went back to the model
+    second = llm.calls[1]["messages"]       # the step + its observation went back as one assistant turn
     assert second[-2]["role"] == "assistant" and second[-2]["content"].startswith("Thought: I need the timeline.")
-    assert second[-1] == {"role": "user", "content": second[-1]["content"]}
-    assert second[-1]["content"].startswith("Observation: Legacy Edition\nPrice: $499")
+    assert '{"name": "Legacy Edition"}\nObservation: Legacy Edition\nPrice: $499' in second[-2]["content"]
+    assert second[-1] == {"role": "user", "content": graph.prompts.CONTINUE_MESSAGE}
+
+
+def test_two_tools_share_one_scratchpad_turn():
+    result, llm = run('Action: get_package\nAction Input: {"name": "Legacy Edition"}',
+                      'Action: get_package\nAction Input: {"name": "Memory Capsule"}',
+                      "Final Answer: $499 and $79.")
+    third = llm.calls[2]["messages"]
+    assert [m["role"] for m in third] == ["system", "user", "assistant", "user"]
+    pad = third[-2]["content"]
+    assert pad.count("Observation:") == 2 and pad.index("Legacy Edition") < pad.index("Memory Capsule")
+    assert result.outcome == "final" and result.steps == 3
 
 
 def test_direct_final_answer_uses_no_tool():
@@ -80,8 +91,8 @@ def test_invented_observation_is_not_sent_back():
 def test_bad_format_is_corrected_once():
     result, llm = run("Let me check that for you.", "Final Answer: Typical projects take 5 to 10 business days.")
     assert nodes(result) == ["reason", "recover", "reason", "finalize"] and result.format_errors == 1
-    correction = llm.calls[1]["messages"][-1]["content"]
-    assert correction.startswith("Observation: FORMAT ERROR:") and "Final Answer:" in correction
+    pad = llm.calls[1]["messages"][-2]["content"]
+    assert pad.startswith("Let me check that for you.\nObservation: FORMAT ERROR:") and "Final Answer:" in pad
     assert result.outcome == "final"
 
 
@@ -107,14 +118,14 @@ def test_endless_actions_stop_at_max_steps():
 
 def test_unknown_tool_error_reaches_the_model_and_the_loop_continues():
     result, llm = run('Action: lookup_prices\nAction Input: {"q": 1}', "Final Answer: Here is what I found.")
-    assert "unknown tool 'lookup_prices'" in llm.calls[1]["messages"][-1]["content"]
+    assert "unknown tool 'lookup_prices'" in llm.calls[1]["messages"][-2]["content"]
     assert result.outcome == "final"
 
 
 def test_tool_error_observation_lets_the_model_recover():
     result, llm = run('Action: record_customer_interest\nAction Input: {"email": "sara-at-example", "name": "Sara"}',
                       "Final Answer: Could you check your email address? It doesn't look valid.")
-    assert "not a valid email" in llm.calls[1]["messages"][-1]["content"] and result.outcome == "final"
+    assert "not a valid email" in llm.calls[1]["messages"][-2]["content"] and result.outcome == "final"
     assert not (TMP / "leads.jsonl").exists() or "sara-at-example" not in (TMP / "leads.jsonl").read_text("utf-8")
 
 

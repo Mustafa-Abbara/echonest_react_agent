@@ -1,5 +1,8 @@
 # Handoff: moving to the Mac in the middle of Stage 4 (2026-10-12)
 
+> **Update 2026-10-14:** Stage 4 is done on the Mac (see the roadmap's Stage 4 "Done" note). Next: Stage 5.
+> Still open: Stage 0b (`ollama pull qwen3:8b`, then the probe) and the qwen3 leg of the switch drill.
+
 Written at the end of the Windows session so a new session (on the Mac) can continue without that conversation.
 **New session: read this file, [Roadmap.md](Roadmap.md) (the plan; its "Requirements Coverage" table is the
 checklist) and the assignment PDF `C4 - Agent Personas  Thinking Mechanisms.pdf` (not in git: copy it over).**
@@ -14,7 +17,7 @@ The older [HANDOFF_FROM_A3.md](HANDOFF_FROM_A3.md) explains the A3 starting poin
 | 1 Provider-neutral LLM layer | ✅ pushed; the only open item is the qwen3 leg of the switch drill | `8d042ab` |
 | 2 Use-case write-up + knowledge tools | ✅ pushed | `bf2d22c` |
 | 3 ReAct format + parser (36/36 fixtures) | ✅ pushed | `6e3d276` |
-| **4 LangGraph ReAct loop** | **written, NOT yet run**: `langgraph` never finished installing on Windows | WIP commit with this file |
+| 4 LangGraph ReAct loop | ✅ done on the Mac 2026-10-14 (100 offline tests; live G1–G6 13/13) | "Stage 4: LangGraph ReAct loop" |
 | 5–12 | not started | – |
 
 85 offline tests pass (Stages 0–3). Stage 4's `tests/test_graph.py` (14 offline tests) and

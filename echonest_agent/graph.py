@@ -7,7 +7,10 @@
 
 - reason: one LLM call (system prompt + chat history + this turn's scratchpad), then parse_react() on the reply.
 - route_after_reason: the conditional edge that DETECTS whether the model suggested an action.
-- act: tools.safe_execute(), then "Observation: ..." goes into the scratchpad.
+- act: tools.safe_execute(), then the step and its "Observation: ..." go into the scratchpad.
+The scratchpad is sent as ONE assistant turn (every step of this turn, each followed by its Observation) plus a short
+"continue" user message: the classic ReAct transcript. Stage 4 live finding: with each Observation in its own user
+message after the step, the default model returned empty "malformed response" replies for most lookups.
 No prebuilt agent is used: not langgraph.prebuilt (create_react_agent, ToolNode, tools_condition), not LangChain's
 AgentExecutor, not a model's native tool calling (bind_tools). Our own code decides every transition.
 """
@@ -37,7 +40,7 @@ class AgentState(TypedDict, total=False):
     user_message: str
     settings: Any             # LLMSettings for this persona
     cot: bool
-    scratchpad: Annotated[list, operator.add]   # this turn's steps and observations, as chat messages
+    scratchpad: Annotated[list, operator.add]   # this turn's steps, each followed by its Observation (text)
     trace: Annotated[list, operator.add]        # one record per node, for printing and logs
     step: int                 # LLM calls made this turn
     max_steps: int
@@ -47,12 +50,20 @@ class AgentState(TypedDict, total=False):
     outcome: str              # "final" | "format_fallback" | "gave_up"
 
 
-def step_message(step: Step, cot=True):
+def step_text(step: Step, cot=True):
     """The assistant's step as it goes back into the scratchpad: rebuilt from the parsed fields, so an invented
     Observation or a second action in the raw reply never reaches the model again."""
     lines = [f"Thought: {step.thought}"] if cot and step.thought else []
     lines += [f"Action: {step.tool}", f"Action Input: {json.dumps(step.args, ensure_ascii=False)}"]
-    return {"role": "assistant", "content": "\n".join(lines)}
+    return "\n".join(lines)
+
+
+def scratchpad_messages(entries):
+    """This turn's steps so far as chat messages: one assistant turn with the whole transcript, then 'continue'."""
+    if not entries:
+        return []
+    return [{"role": "assistant", "content": "\n\n".join(entries)},
+            {"role": "user", "content": prompts.CONTINUE_MESSAGE}]
 
 
 class ReActAgent:
@@ -67,7 +78,7 @@ class ReActAgent:
     # ---------- nodes --------------------------------------------------------------------------------------
     def reason(self, state):
         settings = (state.get("settings") or LLMSettings()).merged(stop=REACT_STOP)
-        result = self.llm.complete(state["messages"] + state.get("scratchpad", []), settings)
+        result = self.llm.complete(state["messages"] + scratchpad_messages(state.get("scratchpad", [])), settings)
         step = parse_react(result.text, tools=self.tool_args)
         n = state.get("step", 0) + 1
         if self.verbose:
@@ -86,8 +97,7 @@ class ReActAgent:
         if self.verbose:
             print(f"🔧 ACTION: {step.tool}({json.dumps(step.args, ensure_ascii=False)})")
             print(f"👁  OBSERVATION: {observation if len(observation) < 400 else observation[:400] + ' …'}")
-        return {"scratchpad": [step_message(step, state.get("cot", True)),
-                               {"role": "user", "content": prompts.observation_message(observation)}],
+        return {"scratchpad": [step_text(step, state.get("cot", True)) + "\n" + prompts.observation_message(observation)],
                 "trace": [{"node": "act", "tool": step.tool, "args": step.args, "observation": observation}]}
 
     def recover(self, state):
@@ -96,8 +106,7 @@ class ReActAgent:
                       "'Action:' + 'Action Input:' (a JSON object), or 'Final Answer:'.")
         if self.verbose:
             print(f"🛠  RECOVER: {step.error}")
-        return {"scratchpad": [{"role": "assistant", "content": step.raw.strip()[:1500] or "(empty reply)"},
-                               {"role": "user", "content": prompts.observation_message(correction)}],
+        return {"scratchpad": [(step.raw.strip()[:1500] or "(empty reply)") + "\n" + prompts.observation_message(correction)],
                 "format_errors": state.get("format_errors", 0) + 1,
                 "trace": [{"node": "recover", "error": step.error}]}
 

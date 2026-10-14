@@ -133,4 +133,7 @@ FIXTURES = [
     {"id": "french_multi_line_final_answer",
      "raw": "Final Answer: Bonjour ! Voici nos options :\n- Memory Capsule : 79 $\n- Event Story : 149 $",
      "expect": {"kind": "final", "answer_contains": "- Event Story : 149 $"}},
+    {"id": "no_space_keywords",   # Flash-Lite, Stage 4 live run (G6): "FinalAnswer:"
+     "raw": "Thought: I logged it.\nFinalAnswer: We do not currently offer film reel restoration.",
+     "expect": {"kind": "final", "answer": "We do not currently offer film reel restoration.", "thought": "I logged it."}},
 ]

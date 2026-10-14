@@ -57,11 +57,11 @@ every stage gate.
 
 | PDF § | Requirement | Mechanism | Proof (stage) | Status |
 |---|---|---|---|---|
-| 1 | One framework, ReAct loop by hand, no prebuilt executor | LangGraph `StateGraph`; banned list (`create_react_agent`, `ToolNode`, `tools_condition`, `AgentExecutor`, `bind_tools`) | grep test + graph diagram (4) | ⏳ |
+| 1 | One framework, ReAct loop by hand, no prebuilt executor | LangGraph `StateGraph`; banned list (`create_react_agent`, `ToolNode`, `tools_condition`, `AgentExecutor`, `bind_tools`) | grep test + graph diagram (4): `test_no_prebuilt_agent_is_used`, `docs/react_graph.md` | ✅ |
 | 2.1 | Use case: goal, audience, tools, constraints/limitations | `docs/use_case.md` (EchoNest reused), later in README + notebook §1 | heading/tool test (2) | ✅ |
 | 2.2 | System prompt defines behaviour and tools; tool descriptions embedded | `tools.describe_tools()` generated from the registry (done); `prompts.py` assembles the prompt (3) | example-call test (2), prompt test (3) | ⏳ (descriptions ✅) |
-| 2.2 | **Detect when the model suggests an action** | `parse_react()` + conditional edge `route_after_reason` | 36/36 parser fixtures (3) ✅, fake-LLM graph tests (4) | ⏳ (parser ✅) |
-| 2.2 | Execute the tool, return the observation, continue the loop | `act` node → scratchpad → `reason` | graph tests + live G1–G6 traces (4) | ⏳ |
+| 2.2 | **Detect when the model suggests an action** | `parse_react()` + conditional edge `route_after_reason` | 37/37 parser fixtures (3), 15 fake-LLM graph tests (4) | ✅ |
+| 2.2 | Execute the tool, return the observation, continue the loop | `act` node → scratchpad → `reason` | graph tests + live G1–G6 traces (4): `docs/evidence/stage4_live_traces.jsonl` | ✅ |
 | 2.2 | Parse the final answer | `parse_react()` → `finalize` | fixtures (3): multi-line, Arabic, French, PDF's `Answer:` | ✅ |
 | 2.3 | ≥ 2 personas with **different tasks** | Milo (concierge/leads), Nora (prices/quotes), Sami (story planning) | persona tests (5) | ⏳ |
 | 2.3 | Personas defined by prompt traits (tone, vocabulary, style, values) | `personas.py` trait fields + prompt block | schema test (5) | ⏳ |
@@ -571,6 +571,23 @@ Run G1, G2 and G5 three times each.
 | Scratchpad stored in the chat history | The prompt grows every turn | History = final answers only |
 
 **Architecture status:** Graph ✅, Parser ✅, Tools ✅, LLM layer ✅.
+
+**Done 2026-10-14 (on the Mac):**
+- `echonest_agent/graph.py`: hand-written `StateGraph` (reason / act / recover / finalize / give_up, conditional edge
+  `route_after_reason`); `langgraph==1.2.15` pinned (`invoke()` returns a plain dict).
+- `tests/test_graph.py`: 15 offline tests with a scripted fake LLM; 100 offline tests pass in total.
+- Diagram: `docs/react_graph.md`. Live: G1–G6 pass, G1, G2, G5 at 3 out of 3 (13/13 runs,
+  `docs/evidence/stage4_live_traces.jsonl`).
+- **Fix found live: scratchpad layout.** The first run sent each Observation as its own user message after the
+  step; `gemini-3.5-flash-lite` then returned empty `MALFORMED_RESPONSE` replies for most lookups (5/12 passed;
+  `docs/evidence/stage4_live_traces_run1_separate_observations.jsonl`). It was deterministic for a given input and not
+  fixed by the seed, any reasoning level, function-calling mode NONE, the compatible endpoint or a renamed
+  observation prefix. Sending the scratchpad as **one assistant turn** (each step + its Observation, the classic ReAct
+  transcript) followed by a short "continue" user message fixed it. About 1 call in 12 is still malformed
+  (`malformed_function_call` / `malformed_response`); the `recover` node handles those.
+- Smaller fixes: the parser accepts `FinalAnswer:` / `ActionInput:` without the space (fixture 37); the google-genai
+  client now has a 120 s timeout (one request hung for 8+ minutes; a timeout is retried as a network error).
+- Quota: about 105 Flash-Lite requests on 2026-10-14 (live runs plus the diagnosis probes).
 
 ---
 

@@ -19,7 +19,7 @@ import re
 from dataclasses import dataclass, field
 
 KEYWORD_RE = re.compile(
-    r"^[ \t>*_#-]*(?:\d+[.)]\s*)?[*_]*(thought|action[ _]input|action|observation|final[ _]answer|answer)[*_]*"
+    r"^[ \t>*_#-]*(?:\d+[.)]\s*)?[*_]*(thought|action[ _]?input|action|observation|final[ _]?answer|answer)[*_]*"
     r"\s*[*_]*:[*_]*[ \t]*", re.I | re.M)
 CALL_RE = re.compile(r"^\s*`?([A-Za-z_][\w.-]*)`?\s*\((.*)\)\s*$", re.S)   # get_package("Legacy") on one line
 
@@ -60,8 +60,8 @@ def _blocks(text):
     out = []
     for i, m in enumerate(marks):
         end = marks[i + 1].start() if i + 1 < len(marks) else len(text)
-        key = re.sub(r"[ _]+", "_", m.group(1).lower())
-        key = {"final_answer": "final", "answer": "final"}.get(key, key)
+        key = re.sub(r"[ _]+", "", m.group(1).lower())          # "Final Answer", "Final_Answer", "FinalAnswer"
+        key = {"actioninput": "action_input", "finalanswer": "final", "answer": "final"}.get(key, key)
         out.append((key, text[m.end():end].strip()))
     return out
 
