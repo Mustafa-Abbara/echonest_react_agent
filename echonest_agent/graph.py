@@ -102,11 +102,14 @@ class ReActAgent:
 
     def recover(self, state):
         step = state["last"]
-        correction = (f"FORMAT ERROR: {step.error}. Reply again with exactly one step, either "
+        raw = step.raw.strip()[:1500]
+        problem = step.error if raw else "your reply was empty"
+        correction = (f"FORMAT ERROR: {problem}. Reply again with exactly one step, either "
                       "'Action:' + 'Action Input:' (a JSON object), or 'Final Answer:'.")
         if self.verbose:
-            print(f"🛠  RECOVER: {step.error}")
-        return {"scratchpad": [(step.raw.strip()[:1500] or "(empty reply)") + "\n" + prompts.observation_message(correction)],
+            print(f"🛠  RECOVER: {problem}")
+        # no placeholder text for an empty reply: a model copied "(empty reply)" back as its answer (Stage 8)
+        return {"scratchpad": [(raw + "\n" if raw else "") + prompts.observation_message(correction)],
                 "format_errors": state.get("format_errors", 0) + 1,
                 "trace": [{"node": "recover", "error": step.error}]}
 

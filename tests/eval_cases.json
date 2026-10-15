@@ -95,6 +95,14 @@
 
     {"id": "C1", "category": "planning", "core": false,
      "message": "Can you help me plan a Memory Capsule for my daughter's graduation?",
-     "required": [["get_package", "search_business_docs"]], "must_include": ["\\b60\\b"]}
+     "required": [["get_package", "search_business_docs"]], "must_include": ["\\b60\\b"]},
+    {"id": "C2", "category": "planning", "core": false,
+     "message": "What questions should we ask in my grandfather's Legacy Edition interviews?",
+     "required": [["get_package", "search_business_docs"]], "must_include": ["\\?"],
+     "note": "creative: suggests interview questions (the sessions are a fact to look up)"},
+    {"id": "C3", "category": "planning", "core": false,
+     "message": "Give me chapter ideas for a Life Timeline about my parents' 40 years of marriage.",
+     "required": [["get_package", "search_business_docs"]], "must_include": ["chapter"],
+     "note": "creative: chapter ideas within the package"}
   ]
 }

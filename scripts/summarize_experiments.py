@@ -8,6 +8,7 @@ With --ratings-sheet it also writes experiments/ratings/<plan>.csv: every answer
 rating of helpfulness and persona fit (PDF 2.5: "which persona gave the most helpful or natural results").
 
 Run from the repo root:  python scripts/summarize_experiments.py --plan experiments/plans/tiny.json
+Combine plans:           ... --plan a.json --plan b.json --name a_vs_b
 """
 import argparse
 import csv
@@ -19,14 +20,14 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
-from echonest_agent.evaluation import distinct_n  # noqa: E402
+from echonest_agent.evaluation import distinct_n, load_cases  # noqa: E402
 
 RESULTS_DIR = ROOT / "experiments" / "results"
 SUMMARY_DIR = ROOT / "experiments" / "summary"
 RATINGS_DIR = ROOT / "experiments" / "ratings"
 COLUMNS = ["config_id", "model", "persona", "variant", "cot", "settings", "runs", "errors", "success", "success_sd",
            "tool_precision", "format_errors", "steps", "requests", "tokens", "latency_s", "words", "words_sd",
-           "distinct_2"]
+           "distinct_2", "distinct_2_rep"]
 
 
 def latest_rows(path):
@@ -45,6 +46,16 @@ def _mean(values, digits=3):
 def _sd(values, digits=3):
     values = [v for v in values if v is not None]
     return round(statistics.stdev(values), digits) if len(values) > 1 else None
+
+
+def _repeat_variety(rows):
+    """Mean over cases of distinct-2 across that case's repeated answers (None without repeats): how much the same
+    question gets different wording."""
+    by_case = defaultdict(list)
+    for r in rows:
+        by_case[r["case_id"]].append(r["answer"])
+    values = [distinct_n(answers) for answers in by_case.values() if len(answers) > 1]
+    return round(statistics.mean(values), 3) if values else None
 
 
 def summarize(rows):
@@ -76,6 +87,7 @@ def summarize(rows):
             "words": _mean([x["words"] for x in m], 1),
             "words_sd": _sd([x["words"] for x in m], 1),
             "distinct_2": distinct_n([r["answer"] for r in ok]),
+            "distinct_2_rep": _repeat_variety(ok),
         })
     return table
 
@@ -83,6 +95,8 @@ def summarize(rows):
 def markdown(plan_name, rows, table):
     shown = ["config_id", "model", "persona", "runs", "errors", "success", "success_sd", "tool_precision",
              "format_errors", "steps", "requests", "latency_s", "words", "distinct_2"]
+    if any(t["distinct_2_rep"] is not None for t in table):
+        shown.append("distinct_2_rep")
     out = [f"# Results: {plan_name}", "",
            f"{len(rows)} runs; cases file {sorted({r['cases_hash'] for r in rows})}. success = share of runs where "
            "every check passed (± spread across repeats).", "",
@@ -133,11 +147,20 @@ def ratings_sheet(rows, path):
 
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--plan", required=True, help="the plan file (its name selects the results file)")
+    ap.add_argument("--plan", required=True, action="append",
+                    help="a plan file (its name selects the results file); repeat it to combine plans in one table")
+    ap.add_argument("--name", help="output name for a combined summary (default: the plan names joined by +)")
+    ap.add_argument("--cases", help="only these cases: core, full, or comma-separated ids (compare models on the "
+                                    "same cases)")
     ap.add_argument("--ratings-sheet", action="store_true", help="also write a blank human-rating sheet")
     args = ap.parse_args(argv)
-    name = json.loads(Path(args.plan).read_text(encoding="utf-8"))["name"]
-    rows = latest_rows(RESULTS_DIR / f"{name}.jsonl")
+    names = [json.loads(Path(p).read_text(encoding="utf-8"))["name"] for p in args.plan]
+    name = args.name or "+".join(names)
+    rows = [row for n in names for row in latest_rows(RESULTS_DIR / f"{n}.jsonl")]
+    if args.cases:
+        subset = args.cases if args.cases in ("core", "full") else args.cases.split(",")
+        keep = {c["id"] for c in load_cases(subset)}
+        rows = [r for r in rows if r["case_id"] in keep]
     table = summarize(rows)
     SUMMARY_DIR.mkdir(parents=True, exist_ok=True)
     with (SUMMARY_DIR / f"{name}.csv").open("w", newline="", encoding="utf-8") as f:

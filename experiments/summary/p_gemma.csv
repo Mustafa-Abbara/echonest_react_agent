@@ -1,0 +1,3 @@
+config_id,model,persona,variant,cot,settings,runs,errors,success,success_sd,tool_precision,format_errors,steps,requests,tokens,latency_s,words,words_sd,distinct_2,distinct_2_rep
+milo-gemma,gemma-4-26b-a4b-it,milo,default,True,"{""frequency_penalty"": 0.2, ""max_tokens"": 400, ""presence_penalty"": 0.3, ""reasoning_effort"": ""low"", ""temperature"": 0.7, ""top_k"": 40, ""top_p"": 0.9}",12,8,1,,1.0,0.25,1.75,7,3007,103.92,31.2,13.3,0.96,
+nora-gemma,gemma-4-26b-a4b-it,nora,default,True,"{""frequency_penalty"": 0.0, ""max_tokens"": 700, ""presence_penalty"": 0.0, ""reasoning_effort"": ""medium"", ""temperature"": 0.1, ""top_k"": 5, ""top_p"": 0.5}",7,6,1,,1.0,0,2,2,3723,165.88,22,,0.895,

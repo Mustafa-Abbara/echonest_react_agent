@@ -1,0 +1,69 @@
+{
+  "name": "s_flash",
+  "description": "Stage 8 S: max_tokens and reasoning effort (honoured) from Milo's settings on the core set, on gemini-3.5-flash-lite. temp-0.0 is a control: Flash-Lite ignores temperature, so the request equals the baseline (a noise floor). Follow-up (added after the first results): reasoning-high-1200 checks whether high reasoning failed only because its hidden thinking used up max_tokens 400.",
+  "cases": "core",
+  "repeats": 1,
+  "configs": [
+    {
+      "id": "base",
+      "persona": "milo",
+      "provider": "gemini_native",
+      "model": "gemini-3.5-flash-lite"
+    },
+    {
+      "id": "max_tokens-150",
+      "persona": "milo",
+      "provider": "gemini_native",
+      "model": "gemini-3.5-flash-lite",
+      "settings": {
+        "max_tokens": 150
+      }
+    },
+    {
+      "id": "max_tokens-600",
+      "persona": "milo",
+      "provider": "gemini_native",
+      "model": "gemini-3.5-flash-lite",
+      "settings": {
+        "max_tokens": 600
+      }
+    },
+    {
+      "id": "reasoning-minimal",
+      "persona": "milo",
+      "provider": "gemini_native",
+      "model": "gemini-3.5-flash-lite",
+      "settings": {
+        "reasoning_effort": "minimal"
+      }
+    },
+    {
+      "id": "reasoning-high",
+      "persona": "milo",
+      "provider": "gemini_native",
+      "model": "gemini-3.5-flash-lite",
+      "settings": {
+        "reasoning_effort": "high"
+      }
+    },
+    {
+      "id": "temp-0.0-control",
+      "persona": "milo",
+      "provider": "gemini_native",
+      "model": "gemini-3.5-flash-lite",
+      "settings": {
+        "temperature": 0.0
+      }
+    },
+    {
+      "id": "reasoning-high-1200",
+      "persona": "milo",
+      "provider": "gemini_native",
+      "model": "gemini-3.5-flash-lite",
+      "settings": {
+        "reasoning_effort": "high",
+        "max_tokens": 1200
+      }
+    }
+  ]
+}

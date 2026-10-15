@@ -1,0 +1,113 @@
+{
+  "name": "s_qwen",
+  "description": "Stage 8 S: one setting at a time from Milo's settings (temperature 0.7, top_p 0.9, top_k 40, frequency 0.2, presence 0.3, max_tokens 400) on the core set, on qwen3:4b-instruct (native), where every setting is honoured.",
+  "cases": "core",
+  "repeats": 1,
+  "configs": [
+    {
+      "id": "base",
+      "persona": "milo",
+      "provider": "ollama_native",
+      "model": "qwen3:4b-instruct"
+    },
+    {
+      "id": "temp-0.0",
+      "persona": "milo",
+      "provider": "ollama_native",
+      "model": "qwen3:4b-instruct",
+      "settings": {
+        "temperature": 0.0
+      }
+    },
+    {
+      "id": "temp-1.4",
+      "persona": "milo",
+      "provider": "ollama_native",
+      "model": "qwen3:4b-instruct",
+      "settings": {
+        "temperature": 1.4
+      }
+    },
+    {
+      "id": "top_p-0.3",
+      "persona": "milo",
+      "provider": "ollama_native",
+      "model": "qwen3:4b-instruct",
+      "settings": {
+        "top_p": 0.3
+      }
+    },
+    {
+      "id": "top_p-1.0",
+      "persona": "milo",
+      "provider": "ollama_native",
+      "model": "qwen3:4b-instruct",
+      "settings": {
+        "top_p": 1.0
+      }
+    },
+    {
+      "id": "top_k-1",
+      "persona": "milo",
+      "provider": "ollama_native",
+      "model": "qwen3:4b-instruct",
+      "settings": {
+        "top_k": 1
+      }
+    },
+    {
+      "id": "freq-0.0",
+      "persona": "milo",
+      "provider": "ollama_native",
+      "model": "qwen3:4b-instruct",
+      "settings": {
+        "frequency_penalty": 0.0
+      }
+    },
+    {
+      "id": "freq-1.0",
+      "persona": "milo",
+      "provider": "ollama_native",
+      "model": "qwen3:4b-instruct",
+      "settings": {
+        "frequency_penalty": 1.0
+      }
+    },
+    {
+      "id": "pres-0.0",
+      "persona": "milo",
+      "provider": "ollama_native",
+      "model": "qwen3:4b-instruct",
+      "settings": {
+        "presence_penalty": 0.0
+      }
+    },
+    {
+      "id": "pres-1.0",
+      "persona": "milo",
+      "provider": "ollama_native",
+      "model": "qwen3:4b-instruct",
+      "settings": {
+        "presence_penalty": 1.0
+      }
+    },
+    {
+      "id": "max_tokens-150",
+      "persona": "milo",
+      "provider": "ollama_native",
+      "model": "qwen3:4b-instruct",
+      "settings": {
+        "max_tokens": 150
+      }
+    },
+    {
+      "id": "max_tokens-600",
+      "persona": "milo",
+      "provider": "ollama_native",
+      "model": "qwen3:4b-instruct",
+      "settings": {
+        "max_tokens": 600
+      }
+    }
+  ]
+}

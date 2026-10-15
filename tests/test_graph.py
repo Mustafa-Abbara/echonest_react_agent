@@ -97,8 +97,10 @@ def test_bad_format_is_corrected_once():
 
 
 def test_two_empty_replies_get_two_corrections():
-    result, _ = run("", "", "Final Answer: It takes 3 to 4 weeks.")
+    result, llm = run("", "", "Final Answer: It takes 3 to 4 weeks.")
     assert nodes(result) == ["reason", "recover", "reason", "recover", "reason", "finalize"]
+    pad = llm.calls[1]["messages"][-2]["content"]
+    assert pad.startswith("Observation: FORMAT ERROR: your reply was empty.") and "(empty reply)" not in pad
     assert result.outcome == "final" and result.format_errors == 2
 
 

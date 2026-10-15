@@ -199,6 +199,11 @@ def test_plan_validation():
 
 
 # ---------- the summarizer ----------------------------------------------------------------------------------
+def test_repeat_variety():
+    rows = [{"case_id": "C1", "answer": "a b c"}, {"case_id": "C1", "answer": "a b c"}, {"case_id": "C2", "answer": "x y"}]
+    assert summary._repeat_variety(rows) == 0.5 and summary._repeat_variety(rows[2:]) is None
+
+
 def test_summary_tables_and_rating_sheet():
     out = TMP / "unit_summary.jsonl"
     run(out)

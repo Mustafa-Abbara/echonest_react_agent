@@ -1,0 +1,3 @@
+config_id,model,persona,variant,cot,settings,runs,errors,success,success_sd,tool_precision,format_errors,steps,requests,tokens,latency_s,words,words_sd,distinct_2,distinct_2_rep
+sami-temp-0.0,qwen3:4b-instruct,sami,default,True,"{""frequency_penalty"": 0.4, ""max_tokens"": 800, ""presence_penalty"": 0.6, ""reasoning_effort"": ""minimal"", ""temperature"": 0.0, ""top_k"": 64, ""top_p"": 0.95}",9,0,0,0.0,1.0,0,1,9,1821,26.91,145.7,11.0,0.29,0.309
+sami-temp-1.4,qwen3:4b-instruct,sami,default,True,"{""frequency_penalty"": 0.4, ""max_tokens"": 800, ""presence_penalty"": 0.6, ""reasoning_effort"": ""minimal"", ""temperature"": 1.4, ""top_k"": 64, ""top_p"": 0.95}",9,0,0,0.0,1.0,0,1,9,1834.0,30.81,153.1,23.0,0.789,0.835

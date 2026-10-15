@@ -822,6 +822,24 @@ Run G1, G2 and G5 three times each.
 
 **Architecture status:** Experiments (persona and settings) ✅.
 
+**Done 2026-10-15 (partial: Gemma and 17 Flash-Lite runs pending):**
+- Plans in `experiments/plans/` (p_, s_, v_ × model), results in `experiments/results/`, summaries in
+  `experiments/summary/` (incl. the combined `personas_by_model.md` and `model_type_core.md`, same cases for every
+  model), findings in `experiments/notes.md`, a human-rating sheet in `experiments/ratings/ratings_sample_flash.csv`
+  (30 answers, to be filled in by hand).
+- Done: personas on Flash-Lite and qwen (full set, 102 runs each), qwen sweep of every setting (144), Flash-Lite
+  sweep of max_tokens and reasoning (67/72), qwen variance (18). Changes on the way: the eval set got 2 creative
+  cases (frozen before Stage 8), `recover` no longer writes "(empty reply)" into the transcript (Gemma copied it),
+  the summarizer can combine plans and filter cases.
+- Gemma was cut to the core set plus a temperature sweep (about 60 s per call), then paused: Google's free endpoint
+  returned 503 for over an hour (5 of 19 runs succeeded). Retry: `python scripts/run_experiments.py --plan
+  experiments/plans/p_gemma.json` (only the failed rows run again), then `s_gemma.json`.
+- After the quota reset: `s_flash.json` (5 control runs + the follow-up `reasoning-high-1200`, about 33–50 requests).
+- Headline findings: model type matters most (Flash-Lite 85–94% vs qwen 59–62%, qwen skips lookups); prompt traits
+  set the voice (Sami twice as long on both models), live sampling settings add variety; temperature 0 / top_p 0.3 /
+  top_k 1 are identical (greedy); high reasoning failed at max_tokens 400 because thinking used up the budget;
+  temperature 1.4 raised variety across repeats from 0.31 to 0.84 without fixing grounding.
+
 ---
 
 ## Stage 9 — Prompt-Engineering Experiments

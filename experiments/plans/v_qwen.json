@@ -1,0 +1,30 @@
+{
+  "name": "v_qwen",
+  "description": "Stage 8 V: variance. Sami on the three creative planning cases, 3 repeats each, temperature 0.0 vs 1.4 (other settings Sami's). Compare distinct_2_rep (variety across repeats) and success.",
+  "cases": [
+    "C1",
+    "C2",
+    "C3"
+  ],
+  "repeats": 3,
+  "configs": [
+    {
+      "id": "sami-temp-0.0",
+      "persona": "sami",
+      "provider": "ollama_native",
+      "model": "qwen3:4b-instruct",
+      "settings": {
+        "temperature": 0.0
+      }
+    },
+    {
+      "id": "sami-temp-1.4",
+      "persona": "sami",
+      "provider": "ollama_native",
+      "model": "qwen3:4b-instruct",
+      "settings": {
+        "temperature": 1.4
+      }
+    }
+  ]
+}

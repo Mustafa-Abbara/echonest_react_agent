@@ -1,0 +1,26 @@
+{
+  "name": "p_qwen",
+  "description": "Stage 8 P: the three personas, each with its own prompt and settings, on the full set. Model: qwen3:4b-instruct through Ollama native (every persona setting live).",
+  "cases": "full",
+  "repeats": 1,
+  "configs": [
+    {
+      "id": "milo-qwen",
+      "persona": "milo",
+      "provider": "ollama_native",
+      "model": "qwen3:4b-instruct"
+    },
+    {
+      "id": "nora-qwen",
+      "persona": "nora",
+      "provider": "ollama_native",
+      "model": "qwen3:4b-instruct"
+    },
+    {
+      "id": "sami-qwen",
+      "persona": "sami",
+      "provider": "ollama_native",
+      "model": "qwen3:4b-instruct"
+    }
+  ]
+}
