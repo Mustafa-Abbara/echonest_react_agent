@@ -22,7 +22,7 @@ The older [HANDOFF_FROM_A3.md](HANDOFF_FROM_A3.md) explains the A3 starting poin
 | 5 Instructions block + personas | ✅ 2026-10-15 (114 offline tests; live 8/9, see the roadmap) | "Stage 5: instructions block and three personas" |
 | 6 Orchestrator, memory, Gradio | ✅ 2026-10-15 (119 offline tests; M1/M2 6/6 live) | "Stage 6: orchestrator and Gradio with persona selector" |
 | 7 Eval set + experiment harness | ✅ 2026-10-15 (129 offline tests; tiny live plan runs, resumes, summarizes) | "Stage 7: eval set and experiment runner" |
-| 8 Persona and settings experiments | ⏳ mostly done 2026-10-15; pending: Gemma (503s) and 17 Flash-Lite runs | "Stage 8: results (partial)" |
+| 8 Persona and settings experiments | ⏳ mostly done 2026-10-15; pending: 17 Flash-Lite runs (Gemma dropped) | "Stage 8: results (partial)" |
 | 9–12 | not started | – |
 
 85 offline tests pass (Stages 0–3). Stage 4's `tests/test_graph.py` (14 offline tests) and

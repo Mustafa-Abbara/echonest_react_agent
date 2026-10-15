@@ -75,7 +75,7 @@ every stage gate.
 | 2.3 | Vary frequency penalty | qwen3 ✅ honoured (rejected by every Gemini-API model) | qwen3 probe (0b); sweep (8) | ⏳ (mechanism ✅) |
 | 2.3 | Vary presence penalty | qwen3 ✅ honoured (rejected by every Gemini-API model) | qwen3 probe (0b); sweep (8) | ⏳ (mechanism ✅) |
 | 2.3 | Vary max tokens | all models ✅ | Stage 0 probe; sweep (8) | ⏳ |
-| 2.3 | Vary model type | Flash-Lite vs Gemma vs qwen3 | plan S-model (8) | ⏳ |
+| 2.3 | Vary model type | Flash-Lite vs qwen3:4b-instruct (Gemma dropped in Stage 8) | `model_type_core.md` (8) | ✅ |
 | 2.3 | Log experiments and compare across setups | runner JSONL (requested/sent/dropped settings) + summary tables | `experiments/` (7–9) | ⏳ (mechanism ✅: runner + summaries, Stage 7) |
 | 2.4 | One purpose per instruction | numbered single-sentence rules | lint test (5): `test_each_rule_has_one_purpose_and_one_sentence` | ✅ |
 | 2.4 | Explicit inputs and outputs, with format | "Inputs you receive" + "Output format" sections | heading test (5) | ✅ |
@@ -822,7 +822,7 @@ Run G1, G2 and G5 three times each.
 
 **Architecture status:** Experiments (persona and settings) ✅.
 
-**Done 2026-10-15 (partial: Gemma and 17 Flash-Lite runs pending):**
+**Done 2026-10-15 (17 Flash-Lite runs pending, after the quota reset):**
 - Plans in `experiments/plans/` (p_, s_, v_ × model), results in `experiments/results/`, summaries in
   `experiments/summary/` (incl. the combined `personas_by_model.md` and `model_type_core.md`, same cases for every
   model), findings in `experiments/notes.md`, a human-rating sheet in `experiments/ratings/ratings_sample_flash.csv`
@@ -831,9 +831,9 @@ Run G1, G2 and G5 three times each.
   sweep of max_tokens and reasoning (67/72), qwen variance (18). Changes on the way: the eval set got 2 creative
   cases (frozen before Stage 8), `recover` no longer writes "(empty reply)" into the transcript (Gemma copied it),
   the summarizer can combine plans and filter cases.
-- Gemma was cut to the core set plus a temperature sweep (about 60 s per call), then paused: Google's free endpoint
-  returned 503 for over an hour (5 of 19 runs succeeded). Retry: `python scripts/run_experiments.py --plan
-  experiments/plans/p_gemma.json` (only the failed rows run again), then `s_gemma.json`.
+- **Gemma dropped** (decision 2026-10-15): the PDF lists "model type" as one setting to vary, which Flash-Lite vs
+  qwen covers, and qwen honours temperature and top_p live. Gemma's free endpoint returned 503 for over an hour (5 of
+  19 runs succeeded) and took 60 to 170 s per call. Its plans and rows were removed.
 - After the quota reset: `s_flash.json` (5 control runs + the follow-up `reasoning-high-1200`, about 33–50 requests).
 - Headline findings: model type matters most (Flash-Lite 85–94% vs qwen 59–62%, qwen skips lookups); prompt traits
   set the voice (Sami twice as long on both models), live sampling settings add variety; temperature 0 / top_p 0.3 /

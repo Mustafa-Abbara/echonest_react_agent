@@ -1,6 +1,6 @@
 # Results: model_type_core
 
-91 runs; cases file ['d7e1f48e0d8d']. success = share of runs where every check passed (± spread across repeats).
+72 runs; cases file ['d7e1f48e0d8d']. success = share of runs where every check passed (± spread across repeats).
 
 | config_id | model | persona | runs | errors | success | success_sd | tool_precision | format_errors | steps | requests | latency_s | words | distinct_2 |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|
@@ -10,37 +10,35 @@
 | milo-qwen | qwen3:4b-instruct | milo | 12 | 0 | 0.833 |  | 1.0 | 0.17 | 2.08 | 25 | 14.08 | 23 | 0.866 |
 | nora-qwen | qwen3:4b-instruct | nora | 12 | 0 | 0.833 |  | 1.0 | 0.08 | 2.17 | 26 | 13.09 | 21.7 | 0.848 |
 | sami-qwen | qwen3:4b-instruct | sami | 12 | 0 | 0.667 |  | 1.0 | 0.08 | 2 | 24 | 17.96 | 50.7 | 0.869 |
-| milo-gemma | gemma-4-26b-a4b-it | milo | 12 | 8 | 1 |  | 1.0 | 0.25 | 1.75 | 7 | 103.92 | 31.2 | 0.96 |
-| nora-gemma | gemma-4-26b-a4b-it | nora | 7 | 6 | 1 |  | 1.0 | 0 | 2 | 2 | 165.88 | 22 | 0.895 |
 
 ## Success by category
 
-| category | milo-flash | nora-flash | sami-flash | milo-qwen | nora-qwen | sami-qwen | milo-gemma | nora-gemma |
-|---|---|---|---|---|---|---|---|---|
-| fact | 3/3 | 3/3 | 3/3 | 3/3 | 3/3 | 3/3 |  | 1/1 |
-| feedback | 1/1 | 1/1 | 1/1 | 1/1 | 1/1 | 1/1 | 1/1 |  |
-| greeting | 1/1 | 1/1 | 1/1 | 1/1 | 0/1 | 0/1 | 1/1 |  |
-| lead | 1/2 | 2/2 | 1/2 | 2/2 | 2/2 | 1/2 | 2/2 |  |
-| no_answer | 1/1 | 1/1 | 1/1 | 0/1 | 1/1 | 0/1 |  |  |
-| not_offered | 1/1 | 1/1 | 1/1 | 1/1 | 1/1 | 1/1 |  |  |
-| price | 3/3 | 3/3 | 3/3 | 2/3 | 2/3 | 2/3 |  |  |
+| category | milo-flash | nora-flash | sami-flash | milo-qwen | nora-qwen | sami-qwen |
+|---|---|---|---|---|---|---|
+| fact | 3/3 | 3/3 | 3/3 | 3/3 | 3/3 | 3/3 |
+| feedback | 1/1 | 1/1 | 1/1 | 1/1 | 1/1 | 1/1 |
+| greeting | 1/1 | 1/1 | 1/1 | 1/1 | 0/1 | 0/1 |
+| lead | 1/2 | 2/2 | 1/2 | 2/2 | 2/2 | 1/2 |
+| no_answer | 1/1 | 1/1 | 1/1 | 0/1 | 1/1 | 0/1 |
+| not_offered | 1/1 | 1/1 | 1/1 | 1/1 | 1/1 | 1/1 |
+| price | 3/3 | 3/3 | 3/3 | 2/3 | 2/3 | 2/3 |
 
 ## Cases × configurations (passed / runs)
 
-| case | milo-flash | nora-flash | sami-flash | milo-qwen | nora-qwen | sami-qwen | milo-gemma | nora-gemma |
-|---|---|---|---|---|---|---|---|---|
-| F1 | 1/1 | 1/1 | 1/1 | 1/1 | 1/1 | 1/1 | 0/1 (1 error) | 1/1 |
-| F2 | 1/1 | 1/1 | 1/1 | 1/1 | 1/1 | 1/1 | 0/1 (1 error) | 0/1 (1 error) |
-| F3 | 1/1 | 1/1 | 1/1 | 1/1 | 1/1 | 1/1 | 0/1 (1 error) | 0/1 (1 error) |
-| P1 | 1/1 | 1/1 | 1/1 | 1/1 | 1/1 | 1/1 | 0/1 (1 error) | 0/1 (1 error) |
-| P2 | 1/1 | 1/1 | 1/1 | 1/1 | 1/1 | 1/1 | 0/1 (1 error) | 0/1 (1 error) |
-| P3 | 1/1 | 1/1 | 1/1 | 0/1 | 0/1 | 0/1 | 0/1 (1 error) | 0/1 (1 error) |
-| N1 | 1/1 | 1/1 | 1/1 | 0/1 | 1/1 | 0/1 | 0/1 (1 error) | 0/1 (1 error) |
-| O1 | 1/1 | 1/1 | 1/1 | 1/1 | 1/1 | 1/1 | 0/1 (1 error) |  |
-| L1 | 0/1 | 1/1 | 1/1 | 1/1 | 1/1 | 0/1 | 1/1 |  |
-| L2 | 1/1 | 1/1 | 0/1 | 1/1 | 1/1 | 1/1 | 1/1 |  |
-| B2 | 1/1 | 1/1 | 1/1 | 1/1 | 1/1 | 1/1 | 1/1 |  |
-| G1 | 1/1 | 1/1 | 1/1 | 1/1 | 0/1 | 0/1 | 1/1 |  |
+| case | milo-flash | nora-flash | sami-flash | milo-qwen | nora-qwen | sami-qwen |
+|---|---|---|---|---|---|---|
+| F1 | 1/1 | 1/1 | 1/1 | 1/1 | 1/1 | 1/1 |
+| F2 | 1/1 | 1/1 | 1/1 | 1/1 | 1/1 | 1/1 |
+| F3 | 1/1 | 1/1 | 1/1 | 1/1 | 1/1 | 1/1 |
+| P1 | 1/1 | 1/1 | 1/1 | 1/1 | 1/1 | 1/1 |
+| P2 | 1/1 | 1/1 | 1/1 | 1/1 | 1/1 | 1/1 |
+| P3 | 1/1 | 1/1 | 1/1 | 0/1 | 0/1 | 0/1 |
+| N1 | 1/1 | 1/1 | 1/1 | 0/1 | 1/1 | 0/1 |
+| O1 | 1/1 | 1/1 | 1/1 | 1/1 | 1/1 | 1/1 |
+| L1 | 0/1 | 1/1 | 1/1 | 1/1 | 1/1 | 0/1 |
+| L2 | 1/1 | 1/1 | 0/1 | 1/1 | 1/1 | 1/1 |
+| B2 | 1/1 | 1/1 | 1/1 | 1/1 | 1/1 | 1/1 |
+| G1 | 1/1 | 1/1 | 1/1 | 1/1 | 0/1 | 0/1 |
 
 ## Most common failure reasons
 

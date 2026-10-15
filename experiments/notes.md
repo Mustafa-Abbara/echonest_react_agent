@@ -29,11 +29,12 @@ Running notes: what we noticed while running the experiments, written down as it
 
 **Coverage.** Done: personas on Flash-Lite and qwen (full set, 102 runs each), the qwen settings sweep (144), the
 Flash-Lite sweep (67 of 72: the last 5 runs of the temperature control wait for the quota reset), the qwen variance
-plan (18). Gemma: only 5 of 19 runs succeeded before we stopped it: Google's free endpoint answered "temporarily
-unavailable" (503) for over an hour, and the runs that did finish took 100 to 170 s per turn. Gemma is retried later;
-until then it is partial evidence only.
+plan (18). **Gemma was dropped:** only 5 of 19 runs succeeded (Google's free endpoint answered "temporarily
+unavailable" for over an hour; finished runs took 100 to 170 s per turn), and the assignment does not need it: "model
+type" is one setting to vary, which Flash-Lite vs qwen already covers, and qwen honours temperature and top_p live.
+Its plans and rows were removed; Gemma stays in the Stage 0 probe evidence.
 
-**1. Model type matters most** (`model_type_core.md`, same 12 core cases): Flash-Lite 92 to 100% task success,
+**1. Model type matters most** (`model_type_core.md`, Flash-Lite vs qwen on the same 12 core cases): Flash-Lite 92 to 100% task success,
 qwen3:4b-instruct 67 to 83%. On the full set: Flash-Lite 85 to 94%, qwen 59 to 62%. qwen's main failure is
 grounding: it answers from its own assumptions instead of looking facts up (`missing tool` is its top failure for
 every persona, 6 to 8 times each), and it never answered Arabic or French in the customer's language (0/2).
