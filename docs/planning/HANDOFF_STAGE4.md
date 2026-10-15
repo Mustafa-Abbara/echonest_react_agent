@@ -1,7 +1,8 @@
 # Handoff: moving to the Mac in the middle of Stage 4 (2026-10-12)
 
-> **Update 2026-10-14:** Stage 4 is done on the Mac (see the roadmap's Stage 4 "Done" note). Next: Stage 5.
-> Still open: Stage 0b (`ollama pull qwen3:8b`, then the probe) and the qwen3 leg of the switch drill.
+> **Update 2026-10-15:** Stages 4 and 0b are done on the Mac (see their "Done" notes in the roadmap). Stage 0b uses
+> `qwen3:4b-instruct` (this Mac has 8 GB of RAM). Next: Stage 5. To use the local model, start Ollama first
+> (`ollama serve`).
 
 Written at the end of the Windows session so a new session (on the Mac) can continue without that conversation.
 **New session: read this file, [Roadmap.md](Roadmap.md) (the plan; its "Requirements Coverage" table is the
@@ -13,8 +14,8 @@ The older [HANDOFF_FROM_A3.md](HANDOFF_FROM_A3.md) explains the A3 starting poin
 | Stage | Status | Commit |
 |---|---|---|
 | 0 Settings probe (what each model honours) | ✅ pushed | `588730a` |
-| 0b Local model probe (Ollama `qwen3:8b`) | ⏳ code ready (`3563e84`); **the model was never downloaded** (slow network) | – |
-| 1 Provider-neutral LLM layer | ✅ pushed; the only open item is the qwen3 leg of the switch drill | `8d042ab` |
+| 0b Local model probe | ✅ done on the Mac 2026-10-15 with `qwen3:4b-instruct` | "Stage 0b: local model probe" |
+| 1 Provider-neutral LLM layer | ✅ pushed; qwen3 leg of the switch drill passed 2026-10-15 | `8d042ab` |
 | 2 Use-case write-up + knowledge tools | ✅ pushed | `bf2d22c` |
 | 3 ReAct format + parser (36/36 fixtures) | ✅ pushed | `6e3d276` |
 | 4 LangGraph ReAct loop | ✅ done on the Mac 2026-10-14 (100 offline tests; live G1–G6 13/13) | "Stage 4: LangGraph ReAct loop" |

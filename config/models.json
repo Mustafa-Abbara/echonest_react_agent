@@ -30,6 +30,7 @@
   "models": {
     "gemini-3.5-flash-lite": {"providers": ["gemini", "gemini_native"], "rpm": 15, "rpd": 500},    "gemma-4-26b-a4b-it": {"providers": ["gemini", "gemini_native"], "rpm": null, "rpd": null},
     "gemma-4-31b-it": {"providers": ["gemini", "gemini_native"], "rpm": null, "rpd": null},
+    "qwen3:4b-instruct": {"providers": ["ollama", "ollama_native"], "rpm": 600, "rpd": null, "local": true},
     "qwen3:8b": {"providers": ["ollama", "ollama_native"], "rpm": 600, "rpd": null, "local": true}
   }
 }

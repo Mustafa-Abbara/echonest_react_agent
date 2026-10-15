@@ -48,6 +48,9 @@ OK_PROMPT = "Reply with the single word OK."
 ENTROPY_PROMPT = ("Write a random sequence of 8 unrelated lowercase English words, separated by spaces. "
                   "Reply with the words only.")
 ECHO_PROMPT = "Write the word echo exactly 50 times, separated by single spaces. Output nothing else."
+DIVERSITY_PROMPT = "Write a 120-word paragraph about the sea."
+ECHO_MAX_TOKENS = 150   # 50 echoes fit easily; a penalised model that rambles instead is cut off (qwen3 on
+                        # Ollama otherwise generated for 10+ minutes per request)
 COUNT200_PROMPT = "Count from 1 to 200, separated by spaces. Output only the numbers."
 COUNT10_PROMPT = "Count from 1 to 10, separated by commas. Output only the numbers."
 REACT_COPY_PROMPT = ("Copy the following four lines exactly, with nothing before or after them:\n"
@@ -125,6 +128,21 @@ def classify_penalty(control_counts, test_counts):
     if control < 30:
         return "inconclusive"
     return "honoured" if test < 0.6 * control else "ignored"
+
+
+def distinct_ratio(text):
+    words = re.findall(r"[a-zA-Z']+", text.lower())
+    return len(set(words)) / len(words) if words else 0.0
+
+
+def classify_diversity(control_a, control_b, test):
+    """Fallback penalty test at temperature 0: a penalty only has to change the text and widen the vocabulary.
+    (A flat presence penalty is too weak to break 'write echo 50 times', yet it does change free text: qwen3, 0b.)"""
+    if control_a != control_b:
+        return "inconclusive"           # temperature 0 is not deterministic here, so a difference proves nothing
+    if test == control_a:
+        return "ignored"
+    return "honoured" if distinct_ratio(test) > distinct_ratio(control_a) else "inconclusive"
 
 
 # ----------------------------------------------------------------------------------------------------
@@ -546,17 +564,35 @@ class Probe:
         if self.quick:
             r = self.b.send(f"{name}_accept", user(OK_PROMPT), **{name: 1.0})
             return entry("untested" if r["ok"] else "rejected", accepted=r["ok"], error=r.get("error"))
-        texts, first = self.sample(f"{name}={PENALTY_VALUE}", ECHO_PROMPT, 2, **{name: PENALTY_VALUE})
+        texts, first = self.sample(f"{name}={PENALTY_VALUE}", ECHO_PROMPT, 2, max_tokens=ECHO_MAX_TOKENS,
+                                   **{name: PENALTY_VALUE})
         if texts is None:
             return entry("rejected", accepted=False, error=first.get("error"))
         if "echo_control" not in self.extra:
-            control, _ = self.sample("echo_control", ECHO_PROMPT, 2)
+            control, _ = self.sample("echo_control", ECHO_PROMPT, 2, max_tokens=ECHO_MAX_TOKENS)
             self.extra["echo_control"] = [count_word(t, "echo") for t in control or []]
         is_validated, validation_error = self.validated(f"{name}_invalid=5.0", **{name: 5.0})
         counts = [count_word(t, "echo") for t in texts]
-        return entry(classify_penalty(self.extra["echo_control"], counts), accepted=True, validated=is_validated,
-                     validation_error=validation_error,
-                     evidence=f"'echo' count with {name}={PENALTY_VALUE}: {counts} vs control {self.extra['echo_control']}")
+        status = classify_penalty(self.extra["echo_control"], counts)
+        evidence = f"'echo' count with {name}={PENALTY_VALUE}: {counts} vs control {self.extra['echo_control']}"
+        if status == "ignored":         # the echo test can miss a weak penalty: check free text at temperature 0
+            status, diversity = self.diversity(name)
+            evidence += f"; fallback at temperature 0: {diversity}"
+        return entry(status, accepted=True, validated=is_validated, validation_error=validation_error,
+                     evidence=evidence)
+
+    def diversity(self, name):
+        fixed = {"temperature": 0, "seed": 1, "max_tokens": 200}
+        if "diversity_control" not in self.extra:
+            pair = [self.b.send(f"diversity_control_{i}", user(DIVERSITY_PROMPT), **fixed) for i in (1, 2)]
+            self.extra["diversity_control"] = [r["texts"][0] if r["ok"] else None for r in pair]
+        a, b = self.extra["diversity_control"]
+        r = self.b.send(f"{name}={PENALTY_VALUE}_diversity", user(DIVERSITY_PROMPT), **fixed, **{name: PENALTY_VALUE})
+        if a is None or b is None or not r["ok"]:
+            return "inconclusive", "a request failed"
+        test = r["texts"][0]
+        return classify_diversity(a, b, test), (f"control repeats: {a == b}; text changed: {test != a}; distinct-word "
+                                                f"ratio {distinct_ratio(a):.3f} -> {distinct_ratio(test):.3f}")
 
     # -- other settings ---------------------------------------------------------------------------
     def max_tokens(self):
@@ -700,7 +736,7 @@ def estimate_requests(repeats, quick):
     control = repeats
     temperature_top_p = 2 * (repeats + 1)          # samples + one out-of-range validation call each
     top_k = 2 * (1 + repeats + 1)                  # per shape: canary + samples + validation
-    penalties = 2 * (2 + 1) + 2                    # per penalty: 2 samples + validation; shared control of 2
+    penalties = 2 * (2 + 1 + 1) + 2 + 2            # per penalty: 2 samples + validation + fallback; 2 shared controls
     rest = 2 + 2 + 4 + 5 + 2   # max_tokens(+alias), stop×2, seed 2×2, reasoning×2 + none + low/medium, system+n
     return control + temperature_top_p + top_k + penalties + rest
 

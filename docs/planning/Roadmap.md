@@ -7,7 +7,7 @@ One rule applies to every stage: **the code must not depend on a specific model 
 ## TL;DR
 
 - **Do this first (Stage 0):** measure which settings Gemini actually *honours*, not only which ones it *accepts*. According to Google's docs, the general-use **Gemini 3.x models ignore temperature, top-K and top-P**, and from `gemini-3.7-flash` on, frequency and presence penalties **fail with HTTP 400**.\[3\] Google's Gemini 3 guide says to remove these sampling parameters from requests.\[2\] If our free `gemini-3.5-flash-lite` behaves this way, every "temperature 0.1 vs 1.0" persona would be an illusion. The probe sends each setting at an extreme value, measures the effect, and writes the result to a **capability file**, which the rest of the code reads.
-- **Stage 0 result (2026-10-12):** confirmed. Flash-Lite ignores temperature/top_p, and no Gemini-API model honours top_k or the penalties. The plan therefore adds **Gemma 4** (honours temperature/top_p) and a **local `qwen3:8b` through Ollama** (top_k and penalties, no quota). It also adds a **requirements coverage table** that blocks building on anything unverified, and the rule that personas are compared on models that honour their settings. See "Status After Stage 0" below.
+- **Stage 0 result (2026-10-12):** confirmed. Flash-Lite ignores temperature/top_p, and no Gemini-API model honours top_k or the penalties. The plan therefore adds **Gemma 4** (honours temperature/top_p) and a **local qwen3 model through Ollama** (top_k and penalties, no quota; Stage 0b settled on `qwen3:4b-instruct`). It also adds a **requirements coverage table** that blocks building on anything unverified, and the rule that personas are compared on models that honour their settings. See "Status After Stage 0" below.
 - **Flexibility comes from design:** use a small **LLM layer** (`llm.py`) with provider-neutral settings, a `config/models.json` that lists providers and models, and per-model capability files. Nodes ask for a persona's settings. The layer sends what the model honours, drops what it rejects, and logs both. Because the ReAct loop is **text-based** (the model writes `Action:` lines and our code parses them), we never use a provider's native function calling. That removes thought-signature problems and lets any chat model work, including ones without tool calling.
 - **How to build it:** LangGraph `StateGraph` with nodes `reason → act → reason … → finalize`, plus a conditional edge that detects an action. We write the parser ourselves, and we use no prebuilt agent (`create_react_agent`, `ToolNode` and `tools_condition` are all off-limits). Move the documents **out** of the prompt and into lookup tools, so the agent has to act.
 - **Experiments:** a scoring set built from A3's labelled tests, a resumable experiment runner that **estimates its request cost before running**, one-factor-at-a-time sweeps, and JSONL logs plus summary tables. The budget is about 1,000–1,300 requests in total, which takes 3+ days on the free Flash-Lite tier, or one day on a paid key.
@@ -30,20 +30,20 @@ One rule applies to every stage: **the code must not depend on a specific model 
 
 ---
 
-## Status After Stage 0 (measured 2026-10-12; details in `docs/stage0_findings.md`)
+## Status After Stage 0 (measured 2026-10-12, qwen3 column 2026-10-15; details in `docs/stage0_findings.md`)
 
 Stage 0 confirmed the docs: **no free Gemini-API model honours top_k or the penalties**, which the PDF names
 explicitly. That is why the plan now uses **three models, each with a job**, and why the requirements table
 below exists. Every requirement needs a verified mechanism before we build on it.
 
-| | `gemini-3.5-flash-lite` | `gemma-4-26b-a4b-it` | `qwen3:8b` (local, Ollama) |
+| | `gemini-3.5-flash-lite` | `gemma-4-26b-a4b-it` | `qwen3:4b-instruct` (local, Ollama) |
 |---|---|---|---|
-| temperature, top_p | ⚪ ignored | ✅ honoured | ⏳ probe (Ollama docs: supported) |
-| top_k | ❌ | ❌ | ⏳ probe via Ollama's native API (`options.top_k`) |
-| frequency / presence penalty | ❌ "Penalty is not enabled" | ❌ same | ⏳ probe (Ollama docs: supported on `/v1`) |
-| seed | ✅ native SDK only | ✅ native SDK only | ⏳ probe |
-| max_tokens, stop, reasoning_effort | ✅ | ✅ (thinking can eat a small max_tokens) | ⏳ probe |
-| Cost / speed | 500 requests/day, fast | free (RPD unconfirmed), slow, frequent 500s | no quota, runs on the RTX 3070 |
+| temperature, top_p | ⚪ ignored | ✅ honoured | ✅ honoured (both paths) |
+| top_k | ❌ | ❌ | ✅ honoured via Ollama's native API (`ollama_native`); ⚪ ignored on `/v1` |
+| frequency / presence penalty | ❌ "Penalty is not enabled" | ❌ same | ✅ honoured (both paths) |
+| seed | ✅ native SDK only | ✅ native SDK only | ✅ honoured |
+| max_tokens, stop, reasoning_effort | ✅ | ✅ (thinking can eat a small max_tokens) | ✅ max_tokens, stop; reasoning: none (instruct model, no thinking) |
+| Cost / speed | 500 requests/day, fast | free (RPD unconfirmed), slow, frequent 500s | no quota; about 8 tokens/s on the M2 (8 GB) |
 | **Job in this project** | the agent, the demo, Gemini-side runs of every experiment | temperature/top_p sweeps; second model type | top_k + penalty sweeps; persona comparison with **every** setting live; third model type |
 
 **Rule added after Stage 0:** a persona's settings only count as evidence when they are compared on a model
@@ -69,11 +69,11 @@ every stage gate.
 | 2.3 | With vs without chain-of-thought | visible `Thought:` lines on/off | plan C (9) | ⏳ |
 | 2.3 | Zero-shot vs few-shot | 0 / 1 / 3 example trajectories | plan F (9) | ⏳ |
 | 2.3 | System prompt vs in-message instructions | instructions in `system` vs in front of the user message (system role works on all three models) | plan M (9) | ⏳ |
-| 2.3 | Vary temperature | Gemma ✅ honoured; qwen3 ⏳ | Stage 0 probe; sweep (8) | ⏳ |
-| 2.3 | Vary top-p | Gemma ✅ honoured; qwen3 ⏳ | Stage 0 probe; sweep (8) | ⏳ |
-| 2.3 | Vary top-k | qwen3 through Ollama native ⏳ (no Gemini-API model honours it) | qwen3 probe (0b); sweep (8) | ⏳ |
-| 2.3 | Vary frequency penalty | qwen3 ⏳ (rejected by every Gemini-API model) | qwen3 probe (0b); sweep (8) | ⏳ |
-| 2.3 | Vary presence penalty | qwen3 ⏳ (rejected by every Gemini-API model) | qwen3 probe (0b); sweep (8) | ⏳ |
+| 2.3 | Vary temperature | Gemma ✅ honoured; qwen3 ✅ honoured | Stage 0/0b probes; sweep (8) | ⏳ (mechanism ✅) |
+| 2.3 | Vary top-p | Gemma ✅ honoured; qwen3 ✅ honoured | Stage 0/0b probes; sweep (8) | ⏳ (mechanism ✅) |
+| 2.3 | Vary top-k | qwen3 through Ollama native ✅ honoured (no Gemini-API model honours it) | qwen3 probe (0b); sweep (8) | ⏳ (mechanism ✅) |
+| 2.3 | Vary frequency penalty | qwen3 ✅ honoured (rejected by every Gemini-API model) | qwen3 probe (0b); sweep (8) | ⏳ (mechanism ✅) |
+| 2.3 | Vary presence penalty | qwen3 ✅ honoured (rejected by every Gemini-API model) | qwen3 probe (0b); sweep (8) | ⏳ (mechanism ✅) |
 | 2.3 | Vary max tokens | all models ✅ | Stage 0 probe; sweep (8) | ⏳ |
 | 2.3 | Vary model type | Flash-Lite vs Gemma vs qwen3 | plan S-model (8) | ⏳ |
 | 2.3 | Log experiments and compare across setups | runner JSONL (requested/sent/dropped settings) + summary tables | `experiments/` (7–9) | ⏳ |
@@ -366,6 +366,24 @@ name; the Ollama request/reply mapping (options, `num_predict`, `think`, token e
 **✅ Gate:** capability files for `ollama__qwen3_8b` and `ollama_native__qwen3_8b`. The top-k and penalty rows of
 the requirements table are ✅, or have a written decision. Commit: *"Stage 0b: local model probe (Ollama qwen3:8b)"*.
 
+**Done 2026-10-15 (on the Mac), with `qwen3:4b-instruct` instead of `qwen3:8b`:**
+- **Why not `qwen3:8b`:** this Mac (M2) has 8 GB of RAM, not the 16 GB the handoff assumed. **Why not `qwen3:4b`:**
+  that tag is now the thinking-only 2507 build; with `think=false` it still writes its reasoning into the answer
+  (about 5,000 tokens and 3–6 minutes per probe request; aborted run kept in
+  `docs/probe/ollama__qwen3_4b__2026-10-14.jsonl`). `qwen3:4b-instruct` (2.5 GB) answers directly.
+- **Results** (`config/capabilities/ollama*__qwen3_4b-instruct.json`, `docs/settings_support.md`): temperature,
+  top_p, frequency and presence penalty, max_tokens, stop and seed honoured on both paths; **top_k honoured only on
+  `ollama_native`** (ignored on `/v1`); reasoning_effort inconclusive (the instruct model has no thinking). Every ❌/⏳
+  qwen3 cell is now ✅, so step 5 was not needed.
+- **Probe fixes:** the penalty "echo" test is capped at 150 tokens (a penalised model rambled for 10+ minutes per
+  request); when it reads "ignored", a fallback compares free text at temperature 0 (control must repeat exactly).
+  That fallback found presence penalty honoured (distinct-word ratio 0.773 → 0.829, text changed on 3/3 prompts;
+  `docs/probe/*presence_check*`). Test: `test_classify_diversity`.
+- Stage 1's switch drill qwen3 leg passed (both Ollama paths, `.env` only; the compatible path drops top_k with
+  the measured reason).
+- **Consequence for Stage 8:** local runs cost no quota but take time (about 8 tokens/s): estimate run time before
+  each qwen3 plan, and the reasoning-effort comparison stays on Flash-Lite + Gemma.
+
 ---
 
 ## Stage 1 — Model-Agnostic LLM Layer + Package Skeleton
@@ -417,7 +435,7 @@ the requirements table are ✅, or have a written decision. Commit: *"Stage 0b: 
 
 **✅ Gate:** offline tests pass. The smoke call works. **Switching drill:** change only `.env` (`LLM_PROVIDER` / `LLM_MODEL`) to Gemma, then to the local `qwen3:8b`, and the smoke call still works with no code edits. Commit: *"Stage 1: provider-neutral LLM layer"*.
 
-**Done 2026-10-12** (except the qwen3 leg of the switching drill, which waits for the download):
+**Done 2026-10-12** (the qwen3 leg of the switching drill passed 2026-10-15 on `qwen3:4b-instruct`, see Stage 0b):
 `echonest_agent/config.py` + `llm.py` (three backends), `scripts/smoke_llm.py`, `tests/test_llm.py` (20 offline
 tests). The live drill passed on Flash-Lite (native + compatible) and Gemma (native). It found that Gemma accepts only
 `minimal`/`high` reasoning, so the probe now records `levels_accepted`, and the layer maps other levels to the nearest
@@ -702,7 +720,7 @@ Run G1, G2 and G5 three times each.
 
 **Steps** (each plan is a JSON file in `experiments/plans/`; always do a `--dry-run` first)
 1. **P — personas:** 3 personas × **full** set × 1 repeat, run on **each of the three models**:
-   - on **qwen3:8b (local)**, where every persona setting is live (if Stage 0b confirms). This is the main evidence
+   - on **qwen3:4b-instruct (local)**, where every persona setting is live (confirmed by Stage 0b). This is the main evidence
      that persona settings matter, and it costs no quota;
    - on **Gemma**, where temperature and top_p are live (≈ 200 requests);
    - on **Flash-Lite**, as the contrast: the same personas with temperature/top_p ignored and penalties dropped;
@@ -721,7 +739,7 @@ Run G1, G2 and G5 three times each.
    | frequency penalty | 0 / 1.0 | qwen3; the Gemini 400 error is reported with its evidence |
    | presence penalty | 0 / 1.0 | qwen3; same |
    | max_tokens | 150 / 600 | Flash-Lite + qwen3 |
-   | reasoning effort | minimal / high | Flash-Lite + qwen3 |
+   | reasoning effort | minimal / high | Flash-Lite + Gemma (the local instruct model has no thinking) |
    | **model type** | Flash-Lite vs Gemma vs qwen3 | all three |
 
    On a model that ignores a setting, run **one** sweep as a control to show "no measurable effect", and don't

@@ -1,0 +1,123 @@
+{
+  "_about": "Written by scripts/probe_settings.py. status: honoured | ignored | rejected | inconclusive | untested. send_as: how the LLM layer must send the setting. Re-run the probe to refresh.",
+  "provider": "ollama_native",
+  "backend": "ollama_native",
+  "model": "qwen3:4b-instruct",
+  "probed_at": "2026-10-15T05:01:03+00:00",
+  "probe_version": 1,
+  "mode": "full",
+  "repeats": 5,
+  "requests_used": 55,
+  "settings": {
+    "temperature": {
+      "status": "honoured",
+      "send_as": "native",
+      "accepted": true,
+      "validated": false,
+      "validation_error": null,
+      "evidence": "temperature=0.0: 1/5 distinct vs control 5/5"
+    },
+    "top_p": {
+      "status": "honoured",
+      "send_as": "native",
+      "accepted": true,
+      "validated": false,
+      "validation_error": null,
+      "evidence": "top_p=0.01: 1/5 distinct vs control 5/5"
+    },
+    "top_k": {
+      "status": "honoured",
+      "send_as": "native",
+      "accepted": true,
+      "validated": false,
+      "validation_error": null,
+      "evidence": "top_k=1: 1/5 distinct vs control 5/5",
+      "unknown_fields_rejected": false,
+      "shapes": {
+        "native": {
+          "status": "honoured",
+          "send_as": "native",
+          "accepted": true,
+          "validated": false,
+          "validation_error": null,
+          "evidence": "top_k=1: 1/5 distinct vs control 5/5",
+          "unknown_fields_rejected": false
+        }
+      }
+    },
+    "frequency_penalty": {
+      "status": "honoured",
+      "send_as": "native",
+      "accepted": true,
+      "validated": false,
+      "validation_error": null,
+      "evidence": "'echo' count with frequency_penalty=1.9: [31, 53] vs control [150, 150]"
+    },
+    "presence_penalty": {
+      "status": "honoured",
+      "send_as": "native",
+      "accepted": true,
+      "validated": false,
+      "validation_error": null,
+      "evidence": "'echo' count with presence_penalty=1.9: [150, 150] vs control [150, 150]; fallback at temperature 0: control repeats: True; text changed: True; distinct-word ratio 0.773 -> 0.829"
+    },
+    "max_tokens": {
+      "status": "honoured",
+      "send_as": "native",
+      "accepted": true,
+      "evidence": "finish_reason=length, 8 numbers written, completion_tokens=16, reasoning_tokens=0, empty_text=False",
+      "alias_max_completion_tokens": "accepted"
+    },
+    "stop": {
+      "status": "honoured",
+      "send_as": "native",
+      "accepted": true,
+      "evidence": "stop=['7'] → '1,2,3,4,5,6,'; stop=['Observation:'] → 'Thought: I should look it up.  \\nAction: search_business_docs'",
+      "react_stop_works": true,
+      "cut_inside_thought": false
+    },
+    "seed": {
+      "status": "honoured",
+      "send_as": "native",
+      "accepted": true,
+      "evidence": "pairs seed 42: ['zigzaggle quibble marmalade snorkel quill gnat fumble tangle', 'zigzaggle quibble marmalade snorkel quill gnat fumble tangle']; seed 7: ['jellyfish quill drift echo mint glisten orbit humidor', 'jellyfish quill drift echo mint glisten orbit humidor']"
+    },
+    "reasoning_effort": {
+      "status": "inconclusive",
+      "send_as": "native",
+      "accepted": true,
+      "value_none": "accepted",
+      "levels_accepted": [
+        "minimal",
+        "low",
+        "medium",
+        "high"
+      ],
+      "evidence": "reasoning tokens minimal=0 high=0; latency minimal=24.51s high=19.13s; answers 'We start with:\\n\\n- 3 red marbles  \\n- 5 blue marbles  \\n- 2 green marbles  \\n\\n**Step 1: Remove every blue marble**\\n\\nSo we remove the 5 blue marbles.\\n\\nNow the box has:\\n\\n- 3 red  \\n- 0 blue  \\n- 2 green  \\n\\n**Step 2: Add twice as many green marbles as there are red ones**\\n\\nThere are 3 red marbles.\\n\\nTwice as many green marbles as red ones = 2 × 3 = 6 green marbles.\\n\\nWe **add** 6 green marbles.\\n\\nSo now green marbles = 2 + 6 =  8 green marbles.\\n\\nNow total marbles:\\n\\n- Red: 3  \\n- Blue: 0  \\n- Green: 8  \\n\\nTotal = 3 + 0 + 8 = **11**\\n\\n✅ Answer: 11' / 'Start with the original marbles:\\n\\n- Red: 3  \\n- Blue: 5  \\n- Green: 2  \\n\\nStep 1: Remove every blue marble.  \\nSo remove 5 blue marbles.  \\nNow blue = 0.\\n\\nMarbles left: 3 red + 2 green = 5 marbles.\\n\\nStep 2: Add **twice as many green marbles as there are red ones**.\\n\\nThere are 3 red marbles, so twice that is:\\n\\n2 × 3 = 6 green marbles.\\n\\nAdd 6 green marbles to the box.\\n\\nOriginal green was 2, now becomes 2 + 6 =  8 green marbles.\\n\\nNow total marbles:\\n\\n- Red: 3  \\n- Blue: 0  \\n- Green: 8  \\n\\nTotal = 3 + 0 + 8 = **11**\\n\\nAnswer: 11'"
+    }
+  },
+  "system_role": {
+    "supported": true,
+    "evidence": "Je suis un modèle de langage à très grande échelle conçu pour aider les utilisateurs à répondre à leurs questions et à effectuer diverses tâches."
+  },
+  "n_greater_than_1": {
+    "supported": false,
+    "error": "Ollama returns one reply per request (no n > 1)"
+  },
+  "thought_inline": false,
+  "control_samples": [
+    "quill jester fable gargoyle snail twilight quiver bumblebee",
+    "jellyfish twilight kazoo quail glisten ripple bamboo",
+    "jellyfish twilight snail quail ripple gavel hummer foggy",
+    "jellyfish glider quill snail orbit hummer velvet gull",
+    "jellyfish twilight kazoo quail ripple glisten snail"
+  ],
+  "reprobed": [
+    {
+      "at": "2026-10-15T05:11:33+00:00",
+      "only": [
+        "presence_penalty"
+      ]
+    }
+  ]
+}

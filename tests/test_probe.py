@@ -42,6 +42,13 @@ def test_classify_collapse():
     assert ps.classify_collapse(5, 3, 5) == "inconclusive"
 
 
+def test_classify_diversity():
+    base = "the sea the sea is blue and the sea is deep"
+    assert ps.classify_diversity(base, base, "the ocean glitters, vast and restless under a pale sky") == "honoured"
+    assert ps.classify_diversity(base, base, base) == "ignored"
+    assert ps.classify_diversity(base, base + " today", "a b c d") == "inconclusive"   # control not deterministic
+
+
 def test_classify_penalty():
     assert ps.classify_penalty([50, 50], [12, 20]) == "honoured"
     assert ps.classify_penalty([50, 50], [49, 50]) == "ignored"

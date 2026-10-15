@@ -1,0 +1,132 @@
+{
+  "_about": "Written by scripts/probe_settings.py. status: honoured | ignored | rejected | inconclusive | untested. send_as: how the LLM layer must send the setting. Re-run the probe to refresh.",
+  "provider": "ollama",
+  "backend": "openai_compat",
+  "model": "qwen3:4b-instruct",
+  "probed_at": "2026-10-15T04:57:44+00:00",
+  "probe_version": 1,
+  "mode": "full",
+  "repeats": 5,
+  "requests_used": 62,
+  "settings": {
+    "temperature": {
+      "status": "honoured",
+      "send_as": "top_level",
+      "accepted": true,
+      "validated": false,
+      "validation_error": null,
+      "evidence": "temperature=0.0: 1/5 distinct vs control 5/5"
+    },
+    "top_p": {
+      "status": "honoured",
+      "send_as": "top_level",
+      "accepted": true,
+      "validated": false,
+      "validation_error": null,
+      "evidence": "top_p=0.01: 1/5 distinct vs control 5/5"
+    },
+    "top_k": {
+      "status": "ignored",
+      "send_as": "top_level",
+      "accepted": true,
+      "validated": false,
+      "validation_error": null,
+      "evidence": "top_k=1: 5/5 distinct vs control 5/5",
+      "unknown_fields_rejected": false,
+      "shapes": {
+        "top_level": {
+          "status": "ignored",
+          "send_as": "top_level",
+          "accepted": true,
+          "validated": false,
+          "validation_error": null,
+          "evidence": "top_k=1: 5/5 distinct vs control 5/5",
+          "unknown_fields_rejected": false
+        },
+        "extra_body.google": {
+          "status": "ignored",
+          "send_as": "extra_body.google",
+          "accepted": true,
+          "validated": false,
+          "validation_error": null,
+          "evidence": "top_k=1: 5/5 distinct vs control 5/5",
+          "unknown_fields_rejected": false
+        }
+      }
+    },
+    "frequency_penalty": {
+      "status": "honoured",
+      "send_as": "top_level",
+      "accepted": true,
+      "validated": false,
+      "validation_error": null,
+      "evidence": "'echo' count with frequency_penalty=1.9: [27, 40] vs control [150, 150]"
+    },
+    "presence_penalty": {
+      "status": "honoured",
+      "send_as": "top_level",
+      "accepted": true,
+      "validated": false,
+      "validation_error": null,
+      "evidence": "'echo' count with presence_penalty=1.9: [150, 150] vs control [150, 150]; fallback at temperature 0: control repeats: True; text changed: True; distinct-word ratio 0.773 -> 0.829"
+    },
+    "max_tokens": {
+      "status": "honoured",
+      "send_as": "top_level",
+      "accepted": true,
+      "evidence": "finish_reason=length, 8 numbers written, completion_tokens=16, reasoning_tokens=0, empty_text=False",
+      "alias_max_completion_tokens": "accepted"
+    },
+    "stop": {
+      "status": "honoured",
+      "send_as": "top_level",
+      "accepted": true,
+      "evidence": "stop=['7'] → '1,2,3,4,5,6,'; stop=['Observation:'] → 'Thought: I should look it up.  \\nAction: search_business_docs'",
+      "react_stop_works": true,
+      "cut_inside_thought": false
+    },
+    "seed": {
+      "status": "honoured",
+      "send_as": "top_level",
+      "accepted": true,
+      "evidence": "pairs seed 42: ['kitchen ripple jazzy foggy quill bumble creak windward', 'kitchen ripple jazzy foggy quill bumble creak windward']; seed 7: ['jelly grape echo siren quill fog nectar', 'jelly grape echo siren quill fog nectar']"
+    },
+    "reasoning_effort": {
+      "status": "inconclusive",
+      "send_as": "top_level",
+      "accepted": true,
+      "value_none": "accepted",
+      "levels_accepted": [
+        "minimal",
+        "low",
+        "medium",
+        "high"
+      ],
+      "evidence": "reasoning tokens minimal=0 high=0; latency minimal=25.01s high=15.99s; answers \"We start with:\\n\\n- 3 red marbles  \\n- 5 blue marbles  \\n- 2 green marbles  \\n\\n**Step 1: Remove every blue marble**\\n\\nAfter removing the 5 blue marbles, we are left with:\\n\\n- 3 red  \\n- 0 blue  \\n- 2 green  \\n\\n**Step 2: Add twice as many green marbles as there are red ones**\\n\\nThere are 3 red marbles.\\n\\nTwice as many green marbles as red ones = 2 × 3 = 6 green marbles.\\n\\nWe currently have 2 green marbles, so we **add** 6 more green marbles.\\n\\nNew green count = 2 + 6 = 8 green marbles\\n\\nNow total marbles = red + blue + green  \\n= 3 + 0 + 9? Wait — no, let's correct:\\n\\nWait — the current green is 2, then we **add** 6 more green marbles.\\n\\nSo total green = 2 + 6 = 8\\n\\nRed = 3  \\nBlue = 0  \\nGreen = 8  \\n\\nTotal = 3 + 0 + 8 = **11**\\n\\n✅ Final answer: **11**\" / 'We start with:\\n\\n- 3 red marbles  \\n- 5 blue marbles  \\n- 2 green marbles  \\n\\n**Step 1: Remove every blue marble**  \\nSo, remove the 5 blue marbles.  \\nNow the box has:  \\n3 red + 2 green = 5 marbles  \\n\\n**Step 2: Add twice as many green marbles as there are red ones**  \\nThere are 3 red marbles.  \\nTwice as many green marbles = 2 × 3 = 6 green marbles  \\n\\nSo, add 6 green marbles.  \\n\\nNow total marbles:  \\n3 red + (2 + 6) green = 3 + 8 = 11 marbles  \\n\\n✅ Final answer: **11**'"
+    }
+  },
+  "system_role": {
+    "supported": true,
+    "evidence": "Je suis une intelligence artificielle conçue pour aider les utilisateurs à trouver des informations et à répondre à leurs questions."
+  },
+  "n_greater_than_1": {
+    "supported": false,
+    "error": null
+  },
+  "thought_inline": false,
+  "control_samples": [
+    "glitter buzz orbit kelp hummus quill jumbo",
+    "jingle buzzel quill molly snout drift glisten",
+    "zebra jelly foggy tango kiosk quail ripple",
+    "jiggle quasar gargoyle marmalade zebra tangerine foggy ripple",
+    "jazz quail ketchup glider foggy snail ribbon echo"
+  ],
+  "reprobed": [
+    {
+      "at": "2026-10-15T05:09:45+00:00",
+      "only": [
+        "presence_penalty"
+      ]
+    }
+  ]
+}

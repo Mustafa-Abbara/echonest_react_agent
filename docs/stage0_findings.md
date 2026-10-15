@@ -53,8 +53,8 @@ Other observations:
 3. **Personas still declare their full intended settings** (temperature, top_p, top_k, penalties). The LLM layer
    reads the capability file and sends only what the active model accepts, logging what it dropped. So when a model
    that supports penalties or top_k is configured (e.g. an OpenAI key), they take effect with no code change.
-4. **top_k and the penalties are honoured by no free model on either path**: this is reported as a finding in the
-   experiments instead of being swept.
+4. **top_k and the penalties are honoured by no free Gemini-API model on either path.** *Updated by Stage 0b:* they
+   are swept on the local `qwen3:4b-instruct` instead (see below), and the Gemini results are reported as a finding.
 5. **Add the native backend (`google_genai`) in Stage 1**, because it honours `seed` (reproducible experiment
    runs) and returns Gemma's thoughts separately. The OpenAI-compatible backend stays, because it is the path to
    OpenAI and other providers. Which one is the default for Gemini is a one-line choice in `.env`
@@ -63,6 +63,28 @@ Other observations:
 7. **Reasoning levels a model doesn't accept are mapped to the nearest accepted one** (Gemma: low → minimal,
    medium → high), and every result records the change in `settings_adjusted`. A persona's "low" thinking still
    runs on Gemma. Found by the Stage 1 switch drill; the probe now records `levels_accepted`.
+
+## Stage 0b — local model (`qwen3:4b-instruct` through Ollama, 2026-10-15)
+
+| Setting | `ollama` (`/v1`, OpenAI-compatible) | `ollama_native` (`/api/chat`) |
+|---|---|---|
+| temperature, top_p | ✅ honoured (1/5 distinct answers at 0 vs 5/5) | ✅ honoured |
+| top_k | ⚪ ignored (not passed on by `/v1`) | ✅ honoured (top_k=1: 1/5 distinct vs 5/5) |
+| frequency_penalty | ✅ honoured ('echo' ×27/×40 vs ×150/×150) | ✅ honoured (×31/×53 vs ×150/×150) |
+| presence_penalty | ✅ honoured (temperature-0 fallback: text changed, distinct-word ratio 0.773 → 0.829) | ✅ honoured (same) |
+| max_tokens, stop, seed | ✅ honoured | ✅ honoured |
+| reasoning_effort | ❓ inconclusive: the instruct model does not think | ❓ same |
+
+- **Model choice:** `qwen3:8b` needs more memory than this 8 GB M2 has free; `qwen3:4b` is now the thinking-only
+  2507 build (it reasons in the answer even with `think=false`: about 5,000 tokens per request). The instruct build
+  answers directly, at about 8 tokens/s.
+- **Probe method changes:** the "write echo 50 times" penalty test is capped at 150 tokens (an unpenalised model
+  keeps going to the cap, so the control reads 150). A flat presence penalty is too weak to break that test, so when
+  it reads "ignored" the probe compares free text at temperature 0 with and without the penalty (the control is
+  sent twice and must repeat exactly). The fallback ran 3 prompts by hand first (`docs/probe/*presence_check*`):
+  the text changed and the vocabulary widened on all 3, on both paths.
+- **Decision:** top_k is swept on `ollama_native` only; the penalties, temperature and top_p on either path. The
+  persona comparison with every setting live runs on this model.
 
 ## Re-running
 
