@@ -59,12 +59,12 @@ every stage gate.
 |---|---|---|---|---|
 | 1 | One framework, ReAct loop by hand, no prebuilt executor | LangGraph `StateGraph`; banned list (`create_react_agent`, `ToolNode`, `tools_condition`, `AgentExecutor`, `bind_tools`) | grep test + graph diagram (4): `test_no_prebuilt_agent_is_used`, `docs/react_graph.md` | ✅ |
 | 2.1 | Use case: goal, audience, tools, constraints/limitations | `docs/use_case.md` (EchoNest reused), later in README + notebook §1 | heading/tool test (2) | ✅ |
-| 2.2 | System prompt defines behaviour and tools; tool descriptions embedded | `tools.describe_tools()` generated from the registry (done); `prompts.py` assembles the prompt (3) | example-call test (2), prompt test (3) | ⏳ (descriptions ✅) |
+| 2.2 | System prompt defines behaviour and tools; tool descriptions embedded | `tools.describe_tools()` generated from the registry (done); `prompts.py` assembles the prompt (3) | example-call test (2), prompt test (3, 5): `test_system_prompt_contains_persona_tools_and_instructions` | ✅ |
 | 2.2 | **Detect when the model suggests an action** | `parse_react()` + conditional edge `route_after_reason` | 37/37 parser fixtures (3), 15 fake-LLM graph tests (4) | ✅ |
 | 2.2 | Execute the tool, return the observation, continue the loop | `act` node → scratchpad → `reason` | graph tests + live G1–G6 traces (4): `docs/evidence/stage4_live_traces.jsonl` | ✅ |
 | 2.2 | Parse the final answer | `parse_react()` → `finalize` | fixtures (3): multi-line, Arabic, French, PDF's `Answer:` | ✅ |
-| 2.3 | ≥ 2 personas with **different tasks** | Milo (concierge/leads), Nora (prices/quotes), Sami (story planning) | persona tests (5) | ⏳ |
-| 2.3 | Personas defined by prompt traits (tone, vocabulary, style, values) | `personas.py` trait fields + prompt block | schema test (5) | ⏳ |
+| 2.3 | ≥ 2 personas with **different tasks** | Milo (concierge/leads), Nora (prices/quotes), Sami (story planning) | persona tests + live focus cases (5) | ✅ |
+| 2.3 | Personas defined by prompt traits (tone, vocabulary, style, values) | `personas.py` trait fields + prompt block | schema test (5) | ✅ |
 | 2.3 | Personas defined by **matching LLM settings** that take effect | intended settings per persona + rationale; compared on qwen3/Gemma where honoured; on Flash-Lite they also differ in reasoning_effort and max_tokens (honoured) | persona cards (intended vs effective) + plan P (8) | ⏳ |
 | 2.3 | With vs without chain-of-thought | visible `Thought:` lines on/off | plan C (9) | ⏳ |
 | 2.3 | Zero-shot vs few-shot | 0 / 1 / 3 example trajectories | plan F (9) | ⏳ |
@@ -77,10 +77,10 @@ every stage gate.
 | 2.3 | Vary max tokens | all models ✅ | Stage 0 probe; sweep (8) | ⏳ |
 | 2.3 | Vary model type | Flash-Lite vs Gemma vs qwen3 | plan S-model (8) | ⏳ |
 | 2.3 | Log experiments and compare across setups | runner JSONL (requested/sent/dropped settings) + summary tables | `experiments/` (7–9) | ⏳ |
-| 2.4 | One purpose per instruction | numbered single-sentence rules | lint test (5) | ⏳ |
-| 2.4 | Explicit inputs and outputs, with format | "Inputs you receive" + "Output format" sections | heading test (5) | ⏳ |
-| 2.4 | ≥ 1 worked example inside the instructions | full G1 trajectory | the example parses with `parse_react()` (5) | ⏳ |
-| 2.4 | Persona and instructions don't conflict | length/tone only in personas; rules only in instructions | lint test (5) | ⏳ |
+| 2.4 | One purpose per instruction | numbered single-sentence rules | lint test (5): `test_each_rule_has_one_purpose_and_one_sentence` | ✅ |
+| 2.4 | Explicit inputs and outputs, with format | "Inputs you receive" + "Output format" sections | heading test (5) | ✅ |
+| 2.4 | ≥ 1 worked example inside the instructions | one full trajectory (an Event Story question, deliberately not a live test case), built from the real tool output | the example parses with `parse_react()` (5) | ✅ |
+| 2.4 | Persona and instructions don't conflict | length/tone only in personas; rules only in instructions | lint tests both ways (5); a live conflict (Milo) found and fixed | ✅ |
 | 1, 2.5 | Evaluate which agent + configuration worked best | scored comparison on the eval set | summary tables (8–10) | ⏳ |
 | 2.5 | Five reflection questions | notebook §Reflection, citing run IDs | write-up (10) | ⏳ |
 | 1 | Final deliverable works as an assistant | Gradio app with persona selector | M1–M2 + screenshots (6, 12) | ⏳ |
@@ -659,6 +659,36 @@ Run G1, G2 and G5 three times each.
 **Common mistakes:** "Be concise" in the shared rules, which conflicts with Sami; persona text that adds rules ("always call…"); identical personas on Gemini because their settings are ignored (that is why their *prompt traits* must differ strongly, and why the effective settings are shown).
 
 **Architecture status:** Instructions ✅, Personas ✅.
+
+**Done 2026-10-15:**
+- `echonest_agent/personas.py`: Milo, Nora, Sami. Each has a task focus, the four traits, provider-neutral settings
+  with a one-line rationale each, and `card(llm)` (intended vs effective settings, no request sent). On Flash-Lite
+  only max_tokens and reasoning_effort survive; on `qwen3:4b-instruct` (native) every setting does.
+- `echonest_agent/prompts.py`: the shared instructions block (Inputs, 13 single-sentence Rules, a Worked example built
+  from the real `get_package` output, Output format); `graph.run()` takes a Persona and uses its settings; traces
+  record the persona id. `tests/test_personas.py`: 12 offline tests; 114 offline tests pass in total.
+- Live (`tests/live_persona_cases.py`, Flash-Lite, 5 full runs kept in `docs/evidence/stage5_live_traces*.jsonl`):
+  the final run passed 8/9. Every behaviour check passed (G1/G2 tool use; Milo asks for name and email; Nora gives
+  the $150 difference and the $74.50 / $149.50 deposits; Sami's numbered plan stays within the 60-photo limit). The
+  one failure was Milo's G1: two unusable model replies in one turn (empty, then malformed), so the graph gave up
+  politely and logged the question. Voices differ: mean answer length Nora 31, Milo 32, Sami 82 words (Sami's plan
+  197).
+- **Findings that changed the design:**
+  1. *Output format position:* with the Output format in the middle of the instructions, Flash-Lite returned empty
+     replies (attempted native tool calls) for 5/6 identical requests; with it last, 1/6; last without the worked
+     example, 3/6. So the format comes last and the worked example stays.
+  2. *Empty replies:* Flash-Lite sometimes returns nothing at random (an identical request then succeeds), so the
+     LLM layer sends an empty reply once more (`test_empty_reply_is_sent_once_more`).
+  3. *Persona vs instructions conflict (PDF 2.4):* Milo's values ("feel heard before packages") beat rule 7, so he
+     asked about feelings instead of an email; the values were reworded and rule 7 now says "in that same reply"
+     with an example of what showing interest means.
+  4. *Rule 2 vs arithmetic:* "never state a price no Observation contains" stopped Nora from giving deposit amounts;
+     amounts calculated from Observation figures are now allowed explicitly.
+  5. *Nora's max_tokens:* medium thinking used 330 of 400 tokens and cut her answer; raised to 700 (on Flash-Lite,
+     thinking counts toward max_tokens).
+- **Open (decide in Stage 6/7):** one format-error correction per turn (`MAX_FORMAT_ERRORS = 1`) sometimes isn't
+  enough on Flash-Lite; raising it to 2 costs at most one more request per turn.
+- Quota: about 180 Flash-Lite requests on 2026-10-15.
 
 ---
 

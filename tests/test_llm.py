@@ -201,6 +201,16 @@ def test_complete_retries_busy_then_succeeds():
     assert client.complete([{"role": "user", "content": "x"}]).text == "ok" and client.requests == 3
 
 
+def test_empty_reply_is_sent_once_more():
+    client = LLM(profile(), backend=Scripted(("", None, "stop", {}), ("ok", None, "stop", {})), retry_wait=0)
+    result = client.complete([{"role": "user", "content": "x"}])
+    assert result.text == "ok" and client.requests == 2 and "empty" in result.warnings[0]
+    twice = LLM(profile(), backend=Scripted(("", None, "stop", {}), ("", None, "stop", {})), retry_wait=0)
+    assert twice.complete([{"role": "user", "content": "x"}]).text == "" and twice.requests == 2
+    cut = LLM(profile(), backend=Scripted(("", "thinking...", "length", {})), retry_wait=0)
+    assert cut.complete([{"role": "user", "content": "x"}]).text == "" and cut.requests == 1   # length: no retry
+
+
 def test_network_errors_are_retried_then_reported():
     ok = LLM(profile(), backend=Scripted(Fail("network"), ("ok", None, "stop", {})), retry_wait=0)
     assert ok.complete([{"role": "user", "content": "x"}]).text == "ok"

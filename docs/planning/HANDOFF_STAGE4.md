@@ -1,7 +1,7 @@
 # Handoff: moving to the Mac in the middle of Stage 4 (2026-10-12)
 
-> **Update 2026-10-15:** Stages 4 and 0b are done on the Mac (see their "Done" notes in the roadmap). Stage 0b uses
-> `qwen3:4b-instruct` (this Mac has 8 GB of RAM). Next: Stage 5. To use the local model, start Ollama first
+> **Update 2026-10-15:** Stages 4, 0b and 5 are done on the Mac (see their "Done" notes in the roadmap). Stage 0b uses
+> `qwen3:4b-instruct` (this Mac has 8 GB of RAM). Next: Stage 6. To use the local model, start Ollama first
 > (`ollama serve`).
 
 Written at the end of the Windows session so a new session (on the Mac) can continue without that conversation.
@@ -19,7 +19,8 @@ The older [HANDOFF_FROM_A3.md](HANDOFF_FROM_A3.md) explains the A3 starting poin
 | 2 Use-case write-up + knowledge tools | ✅ pushed | `bf2d22c` |
 | 3 ReAct format + parser (36/36 fixtures) | ✅ pushed | `6e3d276` |
 | 4 LangGraph ReAct loop | ✅ done on the Mac 2026-10-14 (100 offline tests; live G1–G6 13/13) | "Stage 4: LangGraph ReAct loop" |
-| 5–12 | not started | – |
+| 5 Instructions block + personas | ✅ 2026-10-15 (114 offline tests; live 8/9, see the roadmap) | "Stage 5: instructions block and three personas" |
+| 6–12 | not started | – |
 
 85 offline tests pass (Stages 0–3). Stage 4's `tests/test_graph.py` (14 offline tests) and
 `tests/live_graph_cases.py` (G1–G6, about 35 requests) have **never been run**. Expect small fixes.

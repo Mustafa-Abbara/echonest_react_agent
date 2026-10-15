@@ -23,7 +23,7 @@ from typing import Annotated, Any, TypedDict
 
 from langgraph.graph import END, START, StateGraph
 
-from . import prompts, tools
+from . import personas, prompts, tools
 from .llm import LLMSettings, get_llm
 from .react_parser import Step, parse_react
 
@@ -159,11 +159,17 @@ class ReActAgent:
         return g.compile()
 
     # ---------- one customer message ---------------------------------------------------------------------
-    def run(self, user_message, history=(), persona=prompts.DRAFT_PERSONA, instructions=prompts.DRAFT_INSTRUCTIONS,
-            settings=None, cot=True, max_steps=MAX_STEPS, log=True):
+    def run(self, user_message, history=(), persona=personas.DEFAULT, instructions=None, settings=None, cot=True,
+            max_steps=MAX_STEPS, log=True):
         """Answer one customer message. `history` = earlier turns as [{"role": "user"|"assistant", "content"}]
-        (final answers only; this turn's tool steps are not kept)."""
-        system = prompts.build_system_prompt(persona, instructions, cot=cot)
+        (final answers only; this turn's tool steps are not kept). `persona` is a Persona (its settings are used
+        unless `settings` is given) or a plain prompt text; `instructions` = None uses the shared block."""
+        if isinstance(persona, personas.Persona):
+            persona_id, block = persona.id, persona.prompt_block
+            settings = settings if settings is not None else persona.llm_settings()
+        else:
+            persona_id, block = None, persona
+        system = prompts.build_system_prompt(block, instructions, cot=cot)
         messages = [{"role": "system", "content": system}, *history, {"role": "user", "content": user_message}]
         if self.verbose:
             print(f"👤 USER: {user_message}")
@@ -173,7 +179,7 @@ class ReActAgent:
                                   {"recursion_limit": 4 * max_steps + 10})
         state = getattr(state, "value", state)   # LangGraph >= 1.1 may wrap the final state
         result = TurnResult(answer=state["final_answer"], outcome=state["outcome"], steps=state["step"],
-                            format_errors=state.get("format_errors", 0), trace=state["trace"])
+                            format_errors=state.get("format_errors", 0), trace=state["trace"], persona=persona_id)
         if log:
             result.save(user_message)
         return result
@@ -186,6 +192,7 @@ class TurnResult:
     steps: int                    # LLM calls this turn
     format_errors: int
     trace: list = field(default_factory=list)
+    persona: str | None = None    # persona id, or None for a custom prompt
 
     @property
     def tool_calls(self):
@@ -194,7 +201,8 @@ class TurnResult:
     def save(self, user_message, path=None):
         path = Path(path or TRACES_LOG)
         path.parent.mkdir(parents=True, exist_ok=True)
-        record = {"time": datetime.now(timezone.utc).isoformat(timespec="seconds"), "user": user_message,
+        record = {"time": datetime.now(timezone.utc).isoformat(timespec="seconds"), "persona": self.persona,
+                  "user": user_message,
                   "answer": self.answer, "outcome": self.outcome, "steps": self.steps,
                   "format_errors": self.format_errors, "trace": self.trace}
         with path.open("a", encoding="utf-8") as f:

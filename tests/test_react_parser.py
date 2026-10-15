@@ -77,11 +77,13 @@ def test_format_spec_variants():
         assert "Never write an Observation yourself." in spec
 
 
-def test_system_prompt_contains_persona_instructions_tools_and_format():
-    prompt = prompts.build_system_prompt("You are Milo.", "1. Use tools for facts.", cot=True)
-    order = [prompt.index(s) for s in ("# Persona", "You are Milo.", "# Instructions", "# Tools",
-                                       "## Response format")]
+def test_system_prompt_contains_persona_tools_and_instructions():
+    prompt = prompts.build_system_prompt("You are Milo.", cot=True)
+    order = [prompt.index(s) for s in ("# Persona", "You are Milo.", "# Tools", "# Instructions",
+                                       "## Inputs you receive", "## Rules", "## Worked example", "## Output format")]
     assert order == sorted(order), order
+    custom = prompts.build_system_prompt("You are Milo.", "1. Use tools for facts.")
+    assert "1. Use tools for facts." in custom and "## Rules" not in custom   # a string replaces the block
     for name in tools.TOOLS:
         assert f"### {name}" in prompt, name
     only = prompts.build_system_prompt("P", "I", tool_names=["search_business_docs"])

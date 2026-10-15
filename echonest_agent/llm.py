@@ -373,13 +373,35 @@ class LLM:
         if (p.capabilities or {}).get("system_role", {}).get("supported") is False:
             messages = fold_system(messages)
 
+        raw, thinking, finish, usage, latency = self._send(messages, send)
+        inline, text = split_thinking(raw)
+        retried = False
+        if not text.strip() and finish != "length":   # an empty reply is not an answer, and models sometimes return
+            retried = True                             # nothing at random (Stage 5 live: Flash-Lite): ask once more
+            raw, thinking, finish, usage, latency = self._send(messages, send)
+            inline, text = split_thinking(raw)
+        result = LLMResult(text=text, thinking=thinking or inline, finish_reason=finish, usage=usage,
+                           latency_s=latency, provider=p.provider, model=p.model,
+                           settings_requested=requested, settings_sent=send, settings_dropped=dropped,
+                           unverified=unverified, settings_adjusted=adjusted)
+        if retried:
+            result.warnings.append("the first reply was empty, so the request was sent once more")
+        if not text.strip() and finish == "length":
+            result.warnings.append("max_tokens ran out before any answer (thinking can use it up): "
+                                   "raise max_tokens or lower reasoning_effort")
+        return result
+
+    def _send(self, messages, send):
+        """One request with retries for rate limits, busy servers and network errors.
+        Returns (raw, thinking, finish, usage, latency_s)."""
+        p = self.profile
         for attempt in (1, 2, 3):
             self._pace()
             self.requests += 1
             started = time.monotonic()
             try:
                 raw, thinking, finish, usage = self.backend.request(p.model, messages, send, p.capabilities)
-                break
+                return raw, thinking, finish, usage, round(time.monotonic() - started, 2)
             except Exception as e:   # classified below; anything unknown is re-raised unchanged
                 kind = self.backend.error_kind(e)
                 retry = _retry_seconds(e)
@@ -404,16 +426,6 @@ class LLM:
                 if kind in messages_by_kind:
                     raise LLMError(messages_by_kind[kind]) from None
                 raise
-
-        inline, text = split_thinking(raw)
-        result = LLMResult(text=text, thinking=thinking or inline, finish_reason=finish, usage=usage,
-                           latency_s=round(time.monotonic() - started, 2), provider=p.provider, model=p.model,
-                           settings_requested=requested, settings_sent=send, settings_dropped=dropped,
-                           unverified=unverified, settings_adjusted=adjusted)
-        if not text.strip() and finish == "length":
-            result.warnings.append("max_tokens ran out before any answer (thinking can use it up): "
-                                   "raise max_tokens or lower reasoning_effort")
-        return result
 
 
 def get_llm(provider=None, model=None):
