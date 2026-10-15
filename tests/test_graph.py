@@ -96,6 +96,12 @@ def test_bad_format_is_corrected_once():
     assert result.outcome == "final"
 
 
+def test_two_empty_replies_get_two_corrections():
+    result, _ = run("", "", "Final Answer: It takes 3 to 4 weeks.")
+    assert nodes(result) == ["reason", "recover", "reason", "recover", "reason", "finalize"]
+    assert result.outcome == "final" and result.format_errors == 2
+
+
 def test_plain_prose_twice_becomes_the_answer():
     result, _ = run("Hello there!", "Hello! I'm Milo. How can I help?")
     assert nodes(result) == ["reason", "recover", "reason", "finalize"]
@@ -103,7 +109,9 @@ def test_plain_prose_twice_becomes_the_answer():
 
 
 def test_repeated_invalid_actions_give_up_and_log_the_question():
-    result, _ = run('Action: lookup_prices\nAction Input: {"q": 1}', 'Action: lookup_prices\nAction Input: {"q": 1}')
+    invalid = 'Action: lookup_prices\nAction Input: {"q": 1}'
+    result, llm = run(*[invalid] * (graph.MAX_FORMAT_ERRORS + 1))
+    assert nodes(result).count("recover") == graph.MAX_FORMAT_ERRORS and len(llm.calls) == graph.MAX_FORMAT_ERRORS + 1
     assert nodes(result)[-1] == "give_up" and result.outcome == "gave_up" and result.answer == graph.GIVE_UP_REPLY
     logged = json.loads((TMP / "feedback.jsonl").read_text(encoding="utf-8").splitlines()[-1])
     assert logged["question"].endswith("How long does the Legacy Edition take?")

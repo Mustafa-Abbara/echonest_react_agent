@@ -291,9 +291,7 @@ def test_config_errors_are_readable():
 PROVIDER_CODE = re.compile(r"^\s*(import|from)\s+(openai|google\.genai|google import genai|httpx)\b|"
                            r"\b(gemini-\d|gemma-\d|gpt-\d|qwen\d)", re.M)
 ALLOWED = {"echonest_agent/config.py", "echonest_agent/llm.py",
-           "scripts/probe_settings.py",                     # measures providers directly, by design
-           # A3 code, replaced by the package in Stages 4-6 (Roadmap): remove from this list when it goes
-           "app.py", "scripts/export_app.py", "scripts/prepare_space.py"}
+           "scripts/probe_settings.py"}                     # measures providers directly, by design
 
 
 def test_only_config_and_llm_know_providers():

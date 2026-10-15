@@ -18,5 +18,3 @@ logs/*.jsonl
 # Local editor/agent settings
 .claude/
 
-# Hugging Face upload folder (built by scripts/prepare_space.py)
-dist/

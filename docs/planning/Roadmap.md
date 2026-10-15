@@ -83,7 +83,7 @@ every stage gate.
 | 2.4 | Persona and instructions don't conflict | length/tone only in personas; rules only in instructions | lint tests both ways (5); a live conflict (Milo) found and fixed | ✅ |
 | 1, 2.5 | Evaluate which agent + configuration worked best | scored comparison on the eval set | summary tables (8–10) | ⏳ |
 | 2.5 | Five reflection questions | notebook §Reflection, citing run IDs | write-up (10) | ⏳ |
-| 1 | Final deliverable works as an assistant | Gradio app with persona selector | M1–M2 + screenshots (6, 12) | ⏳ |
+| 1 | Final deliverable works as an assistant | Gradio app with persona selector (`app.py` over `agent.respond()`) | M1–M2 for every persona (6): `docs/evidence/stage6_live_chat.jsonl`, UI screenshots 09–11; final screenshots (12) | ✅ |
 | (user) | Switching model/provider needs no code change | config + capability files + LLM layer; grep test | switch drill (1, 11) | ⏳ |
 
 ---
@@ -713,6 +713,24 @@ Run G1, G2 and G5 three times each.
 **✅ Gate:** M1 and M2 pass when `respond()` is called directly and when it's used from the UI, with each persona. Commit: *"Stage 6: orchestrator and Gradio with persona selector"*.
 
 **Architecture status:** Orchestrator/UI ✅. The core agent is complete.
+
+**Done 2026-10-15:**
+- `echonest_agent/agent.py`: `respond(message, history, persona_id)` reuses A3's history converter, keeps the last 20
+  messages, sends **final answers only** (trace messages are skipped), and turns LLM errors into friendly replies.
+- `app.py` (replaces the A3 export): `gr.ChatInterface` with a persona dropdown; every step is a collapsible message
+  (🔧 tool with Thought / Action Input / Observation, 🛠 format correction, 🛑 gave up, 🧠 final thought), closed by
+  default; a persona card (traits; settings intended vs effective, with the rationale); a footer with the active
+  model. Run: `python app.py`.
+- Retired A3's notebook export (`scripts/export_app.py`, `scripts/prepare_space.py`, `tests/test_app_export.py`,
+  `deploy/hf_space/`): `app.py` is now written against the package, and the Space is optional (A5).
+- `MAX_FORMAT_ERRORS` 1 → 2 (the Stage 5 open item); plain prose after a correction is still taken as the answer.
+- Tests: `tests/test_app.py` (8 offline) and a new graph test; 119 offline tests pass.
+- Live through `respond()` (`tests/live_chat_cases.py`): **M1 and M2 pass for all three personas (6/6)**, with the
+  history passed the way Gradio holds it (trace messages included). Through the UI (built-in browser): Milo M2
+  (asks for name and email, then for the missing email, then saves the lead with the right arguments), Nora M1 and
+  Sami M1 passed; switching the persona changed the voice (Nora: "Your name is Karim."; Sami: "Your name is Karim,
+  and it is wonderful to meet you!"). Screenshots `docs/screenshots/09`–`11`.
+- Quota: about 45 Flash-Lite requests for Stage 6.
 
 ---
 

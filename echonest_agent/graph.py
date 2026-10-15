@@ -28,7 +28,7 @@ from .llm import LLMSettings, get_llm
 from .react_parser import Step, parse_react
 
 MAX_STEPS = 6              # LLM calls per customer message (each is one request against the quota)
-MAX_FORMAT_ERRORS = 1      # corrections sent before falling back
+MAX_FORMAT_ERRORS = 2      # corrections per turn before giving up (1 was sometimes too few on Flash-Lite: Stage 5)
 TRACES_LOG = Path(__file__).resolve().parent.parent / "logs" / "traces.jsonl"
 REACT_STOP = ("Observation:",)   # the model must stop after Action Input (Stage 0: every model honours stop)
 GIVE_UP_REPLY = ("I'm sorry, I couldn't finish looking that up just now. I've passed your question to the "
@@ -139,10 +139,11 @@ class ReActAgent:
             return "give_up"                     # no budget left for another tool call + answer
         if step.kind == "action":
             return "act"
+        if state.get("format_errors", 0) >= 1 and step.error and "no 'Action:' or 'Final Answer:'" in step.error \
+                and step.plain_text:
+            return "finalize"                    # plain prose again after a correction: it is the answer
         if state.get("format_errors", 0) < MAX_FORMAT_ERRORS:
             return "recover"
-        if step.error and "no 'Action:' or 'Final Answer:'" in step.error and step.plain_text:
-            return "finalize"                    # plain prose twice: treat it as the answer (format_fallback)
         return "give_up"
 
     def _build(self):
