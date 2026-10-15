@@ -1,0 +1,4 @@
+run_id,config_id,persona,case_id,message,answer,helpfulness_1to5,persona_fit_1to5,notes
+tiny:milo-default:F1:0,milo-default,milo,F1,How many photos fit in a Memory Capsule?,"A Memory Capsule fits up to 60 photos and up to 3 voice recordings, and it costs $79.",,,
+tiny:milo-default:N1:0,milo-default,milo,N1,Do you sell gift cards?,"We don't currently list gift cards on our menu, but I've shared your question with our team and they'll follow up with you soon!",,,
+tiny:milo-default:G1:0,milo-default,milo,G1,Hi!,"Hello! Welcome to EchoNest. I'm Milo, your Memory Concierge. Are you hoping to turn some special photos, voice notes, or family stories into a keepsake today?",,,

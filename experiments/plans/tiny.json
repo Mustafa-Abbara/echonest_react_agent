@@ -1,0 +1,7 @@
+{
+  "name": "tiny",
+  "description": "Stage 7 gate: one persona on three cases (a fact, an unanswerable question, a greeting), to check that the runner runs, resumes and summarizes.",
+  "cases": ["F1", "N1", "G1"],
+  "repeats": 1,
+  "configs": [{"id": "milo-default", "persona": "milo"}]
+}

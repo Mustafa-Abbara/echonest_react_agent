@@ -76,12 +76,12 @@ every stage gate.
 | 2.3 | Vary presence penalty | qwen3 ✅ honoured (rejected by every Gemini-API model) | qwen3 probe (0b); sweep (8) | ⏳ (mechanism ✅) |
 | 2.3 | Vary max tokens | all models ✅ | Stage 0 probe; sweep (8) | ⏳ |
 | 2.3 | Vary model type | Flash-Lite vs Gemma vs qwen3 | plan S-model (8) | ⏳ |
-| 2.3 | Log experiments and compare across setups | runner JSONL (requested/sent/dropped settings) + summary tables | `experiments/` (7–9) | ⏳ |
+| 2.3 | Log experiments and compare across setups | runner JSONL (requested/sent/dropped settings) + summary tables | `experiments/` (7–9) | ⏳ (mechanism ✅: runner + summaries, Stage 7) |
 | 2.4 | One purpose per instruction | numbered single-sentence rules | lint test (5): `test_each_rule_has_one_purpose_and_one_sentence` | ✅ |
 | 2.4 | Explicit inputs and outputs, with format | "Inputs you receive" + "Output format" sections | heading test (5) | ✅ |
 | 2.4 | ≥ 1 worked example inside the instructions | one full trajectory (an Event Story question, deliberately not a live test case), built from the real tool output | the example parses with `parse_react()` (5) | ✅ |
 | 2.4 | Persona and instructions don't conflict | length/tone only in personas; rules only in instructions | lint tests both ways (5); a live conflict (Milo) found and fixed | ✅ |
-| 1, 2.5 | Evaluate which agent + configuration worked best | scored comparison on the eval set | summary tables (8–10) | ⏳ |
+| 1, 2.5 | Evaluate which agent + configuration worked best | scored comparison on the eval set | summary tables (8–10) | ⏳ (mechanism ✅: eval set + metrics, Stage 7) |
 | 2.5 | Five reflection questions | notebook §Reflection, citing run IDs | write-up (10) | ⏳ |
 | 1 | Final deliverable works as an assistant | Gradio app with persona selector (`app.py` over `agent.respond()`) | M1–M2 for every persona (6): `docs/evidence/stage6_live_chat.jsonl`, UI screenshots 09–11; final screenshots (12) | ✅ |
 | (user) | Switching model/provider needs no code change | config + capability files + LLM layer; grep test | switch drill (1, 11) | ⏳ |
@@ -761,6 +761,26 @@ Run G1, G2 and G5 three times each.
 **Common mistakes:** changing the cases halfway through the experiments (freeze the file and record its hash in every row); scoring on reply wording instead of the tools called; putting results in `logs/`, which is git-ignored (use `experiments/results/`).
 
 **Architecture status:** Eval harness ✅.
+
+**Done 2026-10-15:**
+- `tests/eval_cases.json` (frozen, hash recorded in every row): 32 cases in 12 categories (facts, prices and
+  arithmetic, unanswerable, not offered, leads incl. invalid email and a 3-turn history, feedback, greetings, memory,
+  Arabic, French, prompt injection, planning); **core** = 12 cases for the sweeps. Expected tools are groups of
+  alternatives (e.g. get_package OR search_business_docs), so a case is judged on what the agent did, not on wording.
+- `echonest_agent/evaluation.py`: `score()` (task_success with a list of failure reasons, tool_precision, steps,
+  format_errors, requests incl. empty-reply retries, tokens, latency, words) and `distinct_n()`.
+- `scripts/run_experiments.py`: plans in `experiments/plans/*.json` (configs = persona + optional provider/model,
+  setting overrides, cot, variant); `--dry-run` per model (clean-run requests, and ×1.5 for format corrections, as
+  measured); one row per run in `experiments/results/<plan>.jsonl` (settings requested/sent/dropped, trace, answer,
+  metrics); resumes; stops cleanly on the daily quota. `variant` only has `default`: Stage 9 adds its variants.
+- `scripts/summarize_experiments.py`: `experiments/summary/<plan>.csv` + `.md` (per config: success ± spread
+  across repeats, tool precision, format errors, steps, requests, latency, words, distinct-2; success by category; a
+  case × config grid; the most common failure reasons) and `--ratings-sheet` (blank 1–5 human ratings for helpfulness
+  and persona fit). No persona-lexicon metric: the human ratings judge persona fit.
+- Tests: `tests/test_experiments.py` (10 offline, with a fake LLM that follows each case: the estimate equals the
+  calls, resume, error retry, quota stop, summaries); 129 offline tests pass.
+- Live gate (`experiments/plans/tiny.json`, Milo × F1, N1, G1 on Flash-Lite): 3/3 passed, the rerun sent nothing,
+  the summary and rating sheet were written. Estimated 6 requests, used 9 (0.67 format corrections per turn).
 
 ---
 

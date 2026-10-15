@@ -1,0 +1,2 @@
+config_id,model,persona,variant,cot,settings,runs,errors,success,success_sd,tool_precision,format_errors,steps,requests,tokens,latency_s,words,words_sd,distinct_2
+milo-default,gemini-3.5-flash-lite,milo,default,True,"{""frequency_penalty"": 0.2, ""max_tokens"": 400, ""presence_penalty"": 0.3, ""reasoning_effort"": ""low"", ""temperature"": 0.7, ""top_k"": 40, ""top_p"": 0.9}",3,0,1,,1.0,0.67,2.67,9,4759.0,5.16,22.7,4.2,0.986
