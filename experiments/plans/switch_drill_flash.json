@@ -1,0 +1,16 @@
+{
+  "name": "switch_drill_flash",
+  "description": "Stage 11 model-switch drill, leg 2: .env restored to the default (no LLM_PROVIDER / LLM_MODEL lines: gemini_native / gemini-3.5-flash-lite). Same config and cases as switch_drill.json.",
+  "cases": [
+    "F2",
+    "N1",
+    "G1"
+  ],
+  "repeats": 1,
+  "configs": [
+    {
+      "id": "milo-env-model",
+      "persona": "milo"
+    }
+  ]
+}

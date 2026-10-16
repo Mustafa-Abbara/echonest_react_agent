@@ -1,0 +1,16 @@
+{
+  "name": "switch_drill",
+  "description": "Stage 11 model-switch drill, leg 1: .env switched to LLM_PROVIDER=ollama_native, LLM_MODEL=qwen3:4b-instruct (no code change). No provider or model in the config, so the run uses whatever .env names. Cases F2, N1, G1 (the questions of live cases G1-G3). Leg 2 (.env back to the default) is switch_drill_flash.json.",
+  "cases": [
+    "F2",
+    "N1",
+    "G1"
+  ],
+  "repeats": 1,
+  "configs": [
+    {
+      "id": "milo-env-model",
+      "persona": "milo"
+    }
+  ]
+}

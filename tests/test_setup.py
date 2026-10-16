@@ -10,7 +10,7 @@ def test_packages_import():
 
 
 def test_skeleton_exists():
-    for p in ["me", "logs", "tests", "business_agent.ipynb", ".env.example", ".gitignore", "README.md",
+    for p in ["me", "logs", "tests", "react_agent.ipynb", ".env.example", ".gitignore", "README.md",
               "requirements.txt", "me/about_business.pdf", "me/business_summary.txt"]:
         assert (ROOT / p).exists(), f"missing {p}"
 
