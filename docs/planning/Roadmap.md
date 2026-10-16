@@ -81,8 +81,8 @@ every stage gate.
 | 2.4 | Explicit inputs and outputs, with format | "Inputs you receive" + "Output format" sections | heading test (5) | ✅ |
 | 2.4 | ≥ 1 worked example inside the instructions | one full trajectory (an Event Story question, deliberately not a live test case), built from the real tool output | the example parses with `parse_react()` (5) | ✅ |
 | 2.4 | Persona and instructions don't conflict | length/tone only in personas; rules only in instructions | lint tests both ways (5); a live conflict (Milo) found and fixed | ✅ |
-| 1, 2.5 | Evaluate which agent + configuration worked best | scored comparison on the eval set | summary tables (8–10) | ⏳ (mechanism ✅: eval set + metrics, Stage 7) |
-| 2.5 | Five reflection questions | notebook §Reflection, citing run IDs | write-up (10) | ⏳ |
+| 1, 2.5 | Evaluate which agent + configuration worked best | scored comparison on the eval set | notebook §7–8, README Results (10) | ✅ |
+| 2.5 | Five reflection questions | notebook §8, each claim citing a plan and run ids | `react_agent.ipynb` (10); human ratings pending | ✅ |
 | 1 | Final deliverable works as an assistant | Gradio app with persona selector (`app.py` over `agent.respond()`) | M1–M2 for every persona (6): `docs/evidence/stage6_live_chat.jsonl`, UI screenshots 09–11; final screenshots (12) | ✅ |
 | (user) | Switching model/provider needs no code change | config + capability files + LLM layer; grep test | switch drill (1, 11) | ⏳ |
 
@@ -894,6 +894,18 @@ Run G1, G2 and G5 three times each.
 **✅ Gate:** every grading row maps to a section (see the checklist below). Commit.
 
 **Architecture status:** Write-up ✅.
+
+**Done 2026-10-16:**
+- `react_agent.ipynb` (the A4 notebook, imports the package): use case, the graph and parser (incl. the PDF's own
+  example), tools, personas (traits, settings, rationale, intended vs effective on both models, the settings-support
+  table), the instructions block, a demo (stored Stage 8 traces with `RUN_LIVE = False`), the experiment tables (read
+  from `experiments/summary/*.csv` at run time), the human ratings (if filled in), the five reflection questions with
+  plan and run ids, limitations and how to run. Executes offline with no errors.
+- `README.md` rewritten for A4, with a checklist mapping every PDF grading item to a section and its evidence.
+- Found while checking the reflection: one scoring false negative (`p_flash:milo-flash:A2:0`: correct French "entre 5
+  et 10 jours", but the frozen pattern only accepts "5 à 10"); documented instead of editing the frozen eval set.
+- Pending from the user: the 30 human ratings in `experiments/ratings/ratings_sample_flash.csv` (the notebook shows
+  them once filled in). Charts: none (matplotlib is not installed; the tables carry the comparison).
 
 ---
 
