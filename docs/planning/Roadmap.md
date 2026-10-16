@@ -65,18 +65,18 @@ every stage gate.
 | 2.2 | Parse the final answer | `parse_react()` → `finalize` | fixtures (3): multi-line, Arabic, French, PDF's `Answer:` | ✅ |
 | 2.3 | ≥ 2 personas with **different tasks** | Milo (concierge/leads), Nora (prices/quotes), Sami (story planning) | persona tests + live focus cases (5) | ✅ |
 | 2.3 | Personas defined by prompt traits (tone, vocabulary, style, values) | `personas.py` trait fields + prompt block | schema test (5) | ✅ |
-| 2.3 | Personas defined by **matching LLM settings** that take effect | intended settings per persona + rationale; compared on qwen3/Gemma where honoured; on Flash-Lite they also differ in reasoning_effort and max_tokens (honoured) | persona cards (intended vs effective) + plan P (8) | ⏳ |
+| 2.3 | Personas defined by **matching LLM settings** that take effect | intended settings + rationale per persona; persona cards show intended vs effective; compared on qwen (all live) and Flash-Lite (most dropped) | `personas_by_model.md`, `experiments/notes.md` §2 (8) | ✅ |
 | 2.3 | With vs without chain-of-thought | visible `Thought:` lines on/off | plan C (9) | ⏳ |
 | 2.3 | Zero-shot vs few-shot | 0 / 1 / 3 example trajectories | plan F (9) | ⏳ |
 | 2.3 | System prompt vs in-message instructions | instructions in `system` vs in front of the user message (system role works on all three models) | plan M (9) | ⏳ |
-| 2.3 | Vary temperature | Gemma ✅ honoured; qwen3 ✅ honoured | Stage 0/0b probes; sweep (8) | ⏳ (mechanism ✅) |
-| 2.3 | Vary top-p | Gemma ✅ honoured; qwen3 ✅ honoured | Stage 0/0b probes; sweep (8) | ⏳ (mechanism ✅) |
-| 2.3 | Vary top-k | qwen3 through Ollama native ✅ honoured (no Gemini-API model honours it) | qwen3 probe (0b); sweep (8) | ⏳ (mechanism ✅) |
-| 2.3 | Vary frequency penalty | qwen3 ✅ honoured (rejected by every Gemini-API model) | qwen3 probe (0b); sweep (8) | ⏳ (mechanism ✅) |
-| 2.3 | Vary presence penalty | qwen3 ✅ honoured (rejected by every Gemini-API model) | qwen3 probe (0b); sweep (8) | ⏳ (mechanism ✅) |
-| 2.3 | Vary max tokens | all models ✅ | Stage 0 probe; sweep (8) | ⏳ |
+| 2.3 | Vary temperature | qwen 0.0 / 0.7 / 1.4 (+ variance plan 0.0 vs 1.4); Flash-Lite control (ignored) | `s_qwen.md`, `v_qwen.md`, `s_flash.md` (8) | ✅ |
+| 2.3 | Vary top-p | qwen 0.3 / 0.9 / 1.0 | `s_qwen.md` (8) | ✅ |
+| 2.3 | Vary top-k | qwen (Ollama native) 1 / 40 | `s_qwen.md` (8) | ✅ |
+| 2.3 | Vary frequency penalty | qwen 0.0 / 0.2 / 1.0 (rejected by every Gemini-API model) | `s_qwen.md` (8) | ✅ |
+| 2.3 | Vary presence penalty | qwen 0.0 / 0.3 / 1.0 (rejected by every Gemini-API model) | `s_qwen.md` (8) | ✅ |
+| 2.3 | Vary max tokens | qwen and Flash-Lite 150 / 400 / 600 (+ high reasoning at 1200, Stage 8 follow-up) | `s_qwen.md`, `s_flash.md` (8) | ✅ |
 | 2.3 | Vary model type | Flash-Lite vs qwen3:4b-instruct (Gemma dropped in Stage 8) | `model_type_core.md` (8) | ✅ |
-| 2.3 | Log experiments and compare across setups | runner JSONL (requested/sent/dropped settings) + summary tables | `experiments/` (7–9) | ⏳ (mechanism ✅: runner + summaries, Stage 7) |
+| 2.3 | Log experiments and compare across setups | one row per run (settings requested/sent/dropped, trace, metrics) + summary tables | `experiments/results/`, `experiments/summary/` (7–9) | ✅ |
 | 2.4 | One purpose per instruction | numbered single-sentence rules | lint test (5): `test_each_rule_has_one_purpose_and_one_sentence` | ✅ |
 | 2.4 | Explicit inputs and outputs, with format | "Inputs you receive" + "Output format" sections | heading test (5) | ✅ |
 | 2.4 | ≥ 1 worked example inside the instructions | one full trajectory (an Event Story question, deliberately not a live test case), built from the real tool output | the example parses with `parse_react()` (5) | ✅ |
