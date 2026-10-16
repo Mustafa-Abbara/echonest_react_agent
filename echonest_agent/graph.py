@@ -164,17 +164,24 @@ class ReActAgent:
 
     # ---------- one customer message ---------------------------------------------------------------------
     def run(self, user_message, history=(), persona=personas.DEFAULT, instructions=None, settings=None, cot=True,
-            max_steps=MAX_STEPS, log=True):
+            max_steps=MAX_STEPS, log=True, placement="system"):
         """Answer one customer message. `history` = earlier turns as [{"role": "user"|"assistant", "content"}]
         (final answers only; this turn's tool steps are not kept). `persona` is a Persona (its settings are used
-        unless `settings` is given) or a plain prompt text; `instructions` = None uses the shared block."""
+        unless `settings` is given) or a plain prompt text; `instructions` = None uses the shared block.
+        `placement` = "in_message" moves the tools and instructions from the system prompt to the front of the
+        customer's message (Stage 9 experiment)."""
         if isinstance(persona, personas.Persona):
             persona_id, block = persona.id, persona.prompt_block
             settings = settings if settings is not None else persona.llm_settings()
         else:
             persona_id, block = None, persona
-        system = prompts.build_system_prompt(block, instructions, cot=cot)
-        messages = [{"role": "system", "content": system}, *history, {"role": "user", "content": user_message}]
+        if placement == "in_message":
+            system, content = prompts.persona_section(block), prompts.in_message(user_message, instructions, cot=cot)
+        elif placement == "system":
+            system, content = prompts.build_system_prompt(block, instructions, cot=cot), user_message
+        else:
+            raise ValueError(f"placement must be 'system' or 'in_message', not {placement!r}")
+        messages = [{"role": "system", "content": system}, *history, {"role": "user", "content": content}]
         if self.verbose:
             print(f"👤 USER: {user_message}")
         state = self.graph.invoke({"messages": messages, "user_message": user_message, "settings": settings,

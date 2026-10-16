@@ -1,0 +1,42 @@
+{
+  "name": "prompt_flash",
+  "description": "Stage 9 (PDF 2.3 prompt engineering): one factor at a time from the shipped default (Milo, the best persona on Flash-Lite in Stage 8; visible Thought lines; one worked example; instructions in the system prompt) on the core set. no-cot: no Thought lines (hidden reasoning stays at Milo's 'low'). zero-shot: no worked example (an ablation: the shipped block always keeps it). few-shot: two more examples (a lead, a NO_MATCH). in-message: the system prompt holds only the persona; the tools and instructions go in front of the customer's message.",
+  "cases": "core",
+  "repeats": 1,
+  "configs": [
+    {
+      "id": "default",
+      "persona": "milo",
+      "provider": "gemini_native",
+      "model": "gemini-3.5-flash-lite"
+    },
+    {
+      "id": "no-cot",
+      "persona": "milo",
+      "provider": "gemini_native",
+      "model": "gemini-3.5-flash-lite",
+      "cot": false
+    },
+    {
+      "id": "zero-shot",
+      "persona": "milo",
+      "provider": "gemini_native",
+      "model": "gemini-3.5-flash-lite",
+      "variant": "zero_shot"
+    },
+    {
+      "id": "few-shot",
+      "persona": "milo",
+      "provider": "gemini_native",
+      "model": "gemini-3.5-flash-lite",
+      "variant": "few_shot"
+    },
+    {
+      "id": "in-message",
+      "persona": "milo",
+      "provider": "gemini_native",
+      "model": "gemini-3.5-flash-lite",
+      "variant": "in_message"
+    }
+  ]
+}

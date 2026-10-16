@@ -87,6 +87,34 @@ WORKED_EXAMPLE = {
                         "$149."},
 }
 
+# Two more trajectories for the few-shot experiment (Stage 9; PDF 2.3 "zero-shot vs few-shot"). The shipped block
+# keeps the single example above. Steps that write to the logs carry a fixed Observation in the real tool's format, so
+# building a prompt never saves a lead or a feedback entry.
+EXTRA_EXAMPLES = [
+    {"customer": "I'm Rania, rania@example.com. I'd like an Event Story for my sister's wedding.",
+     "steps": [{"thought": "Rania gave her name and a valid email address and wants an Event Story, so I can save her "
+                           "interest for the team.",
+                "tool": "record_customer_interest",
+                "args": {"email": "rania@example.com", "name": "Rania", "message": "Event Story for her sister's wedding"},
+                "observation": "OK: lead lead_1a2b3c4d saved for Rania <rania@example.com>. Lina Farhat's team replies "
+                               "within one business day."}],
+     "final": {"thought": "The Observation confirms that the lead was saved.",
+               "answer": "Thank you, Rania! Your details are saved, and Lina Farhat's team will reply within one business "
+                         "day about the Event Story for your sister's wedding."}},
+    {"customer": "Do you offer framed prints?",
+     "steps": [{"thought": "I need to check whether EchoNest offers framed prints.",
+                "tool": "search_business_docs", "args": {"query": "framed prints"}},
+               {"thought": "The documents do not mention framed prints, so I must log the question for the team.",
+                "tool": "record_feedback", "args": {"question": "Do you offer framed prints?"},
+                "observation": "OK: logged as fb_5e6f7a8b. The EchoNest team will see it."}],
+     "final": {"thought": "The question is logged, so I can tell the customer that the team will follow up.",
+               "answer": "I couldn't find framed prints in our documents, so I've passed your question to the team, and "
+                         "they will follow up with you."}},
+]
+EXAMPLES = [WORKED_EXAMPLE, *EXTRA_EXAMPLES]
+EXAMPLE_INTRO = ("Each step below is a separate reply in the Output format below: after Action Input you stop, and the "
+                 "system adds the Observation.")
+
 
 def format_spec(cot=True):
     return FORMAT_WITH_COT if cot else FORMAT_WITHOUT_COT
@@ -105,23 +133,38 @@ def example_replies(cot=True, example=WORKED_EXAMPLE):
     return replies
 
 
-def worked_example(cot=True, example=WORKED_EXAMPLE):
-    """The full trajectory as text: the customer's message, each reply, and the real Observation after each Action."""
+def _trajectory(cot, example):
+    """The customer's message, each reply, and the Observation after each Action (the real tool output for a lookup,
+    the example's fixed text for a tool that writes to the logs)."""
     replies = example_replies(cot, example)
     parts = [f"Customer: {example['customer']}"]
     for step, reply in zip(example["steps"], replies):
-        parts += [reply, observation_message(tools.safe_execute(step["tool"], step["args"]))]
+        observation = step.get("observation") or tools.safe_execute(step["tool"], step["args"])
+        parts += [reply, observation_message(observation)]
     parts.append(replies[-1])
-    return ("## Worked example\nEach step below is a separate reply in the Output format below: after Action Input "
-            "you stop, and the system adds the Observation.\n\n" + "\n".join(parts))
+    return "\n".join(parts)
 
 
-def build_instructions(cot=True):
-    """The instructions block (PDF 2.4): inputs, rules (one purpose each), a worked example, and the output format.
+def worked_example(cot=True, example=WORKED_EXAMPLE):
+    """The shipped worked example as a section of the instructions."""
+    return f"## Worked example\n{EXAMPLE_INTRO}\n\n{_trajectory(cot, example)}"
+
+
+def worked_examples(cot=True, examples=EXAMPLES):
+    if len(examples) == 1:
+        return worked_example(cot, examples[0])
+    return f"## Worked examples\n{EXAMPLE_INTRO}\n\n" + "\n\n".join(
+        f"Example {i}:\n{_trajectory(cot, ex)}" for i, ex in enumerate(examples, 1))
+
+
+def build_instructions(cot=True, examples=1):
+    """The instructions block (PDF 2.4): inputs, rules (one purpose each), worked example(s), and the output format.
+    `examples` = 1 is the shipped block; 0 (zero-shot) and 3 (few-shot) exist only for the Stage 9 experiment.
     The output format comes LAST on purpose: with it in the middle, the default model returned empty replies
     (attempted native tool calls) for 5 of 6 identical requests; last, 1 of 6 (Stage 5 live finding)."""
     rules = "## Rules\n" + "\n".join(f"{i}. {rule}" for i, rule in enumerate(RULES, 1))
-    return "\n\n".join([INPUTS, rules, worked_example(cot), format_spec(cot)])
+    shots = [worked_examples(cot, EXAMPLES[:examples])] if examples else []
+    return "\n\n".join([INPUTS, rules, *shots, format_spec(cot)])
 
 
 CONTINUE_MESSAGE = "Continue with your next step: an Action, or your Final Answer."
@@ -132,10 +175,24 @@ def observation_message(observation):
     return f"Observation: {observation}"
 
 
+def persona_section(persona):
+    return f"# Persona\n\n{persona.strip()}"
+
+
+def behaviour_section(instructions=None, cot=True, tool_names=None):
+    """The tools, then the instructions. `instructions` = None uses the shared block from build_instructions(cot);
+    a string replaces the whole block (for experiments)."""
+    return "\n\n".join(["# Tools\nYou can use these tools. Each one returns an Observation.",
+                         tools.describe_tools(tool_names), "# Instructions",
+                         (instructions or build_instructions(cot)).strip()])
+
+
 def build_system_prompt(persona, instructions=None, cot=True, tool_names=None):
-    """Persona, then the tools, then the instructions (each a labelled section). `instructions` = None uses the
-    shared block from build_instructions(cot); a string replaces the whole block (for experiments)."""
-    parts = ["# Persona", persona.strip(),
-             "# Tools\nYou can use these tools. Each one returns an Observation.", tools.describe_tools(tool_names),
-             "# Instructions", (instructions or build_instructions(cot)).strip()]
-    return "\n\n".join(p for p in parts if p)
+    """Persona, then the tools, then the instructions (each a labelled section)."""
+    return "\n\n".join([persona_section(persona), behaviour_section(instructions, cot, tool_names)])
+
+
+def in_message(user_message, instructions=None, cot=True, tool_names=None):
+    """The 'in-message' placement (Stage 9; PDF 2.3 "system prompts vs in-message instructions"): the tools and the
+    instructions go in front of the customer's message instead of in the system prompt."""
+    return f"{behaviour_section(instructions, cot, tool_names)}\n\n# Customer message\n\n{user_message}"

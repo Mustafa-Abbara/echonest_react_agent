@@ -128,6 +128,42 @@ def test_worked_example_parses_and_uses_the_real_observation():
         assert prompts.observation_message(real) in block and "up to 150 photos" in real
 
 
+def test_shot_variants_for_the_experiment():
+    zero, one, few = (prompts.build_instructions(examples=n) for n in (0, 1, 3))
+    assert "## Worked example" not in zero and one == prompts.build_instructions()      # the shipped block = 1 shot
+    assert "## Worked examples" in few and few.count("Customer: ") == 3
+    for block in (zero, one, few):
+        assert block.rstrip().endswith(prompts.format_spec().rstrip())                 # the format stays last
+    for example in prompts.EXTRA_EXAMPLES:
+        for cot in (True, False):
+            for reply in prompts.example_replies(cot, example):
+                assert reply in prompts.build_instructions(cot, examples=3)
+                assert parse_react(reply, tools=tools.tool_arguments()).kind in ("action", "final"), reply
+    assert not (TMP / "leads.jsonl").exists() and not (TMP / "feedback.jsonl").exists()   # building saved nothing
+
+
+def test_in_message_placement():
+    calls = []
+
+    class FakeLLM:
+        def complete(self, messages, settings=None):
+            calls.append(messages)
+            return LLMResult(text="Final Answer: Hi!", thinking=None, finish_reason="stop", usage={}, latency_s=0.0,
+                             provider="fake", model="fake", settings_requested={}, settings_sent={},
+                             settings_dropped={}, unverified=[])
+
+    agent = graph.ReActAgent(llm=FakeLLM(), verbose=False)
+    agent.run("Hi!", persona=personas.MILO, placement="in_message")
+    system, user = calls[0][0]["content"], calls[0][-1]["content"]
+    assert system.startswith("# Persona") and "# Instructions" not in system and "# Tools" not in system
+    assert user.startswith("# Tools") and "## Rules" in user and user.endswith("# Customer message\n\nHi!")
+    try:
+        agent.run("Hi!", placement="sideways")
+        raise AssertionError("an unknown placement must be refused")
+    except ValueError:
+        pass
+
+
 def test_worked_example_is_not_a_live_test_case():
     import live_graph_cases
     assert prompts.WORKED_EXAMPLE["customer"] not in {c["message"] for c in live_graph_cases.CASES}
@@ -152,7 +188,7 @@ def test_graph_uses_the_persona_prompt_and_settings():
     agent.run("Hi", persona=personas.NORA, settings=LLMSettings(max_tokens=50))       # explicit settings win
     assert calls[1][1].max_tokens == 50 and calls[1][1].temperature is None
     assert result.persona == "nora"
-    assert json.loads(graph.TRACES_LOG.read_text(encoding="utf-8").splitlines()[0])["persona"] == "nora"
+    assert json.loads(graph.TRACES_LOG.read_text(encoding="utf-8").splitlines()[-1])["persona"] == "nora"
 
 
 if __name__ == "__main__":

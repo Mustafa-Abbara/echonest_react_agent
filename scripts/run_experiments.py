@@ -24,12 +24,14 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
-from echonest_agent import evaluation, graph, personas  # noqa: E402
+from echonest_agent import evaluation, graph, personas, prompts  # noqa: E402
 from echonest_agent.config import MODELS_FILE, load_profile  # noqa: E402
 from echonest_agent.llm import LLMError, LLMSettings, QuotaExhausted, get_llm  # noqa: E402
 
 RESULTS_DIR = ROOT / "experiments" / "results"
-VARIANTS = {"default": None}   # prompt variants for Stage 9: name -> instructions builder (None = the shared block)
+# prompt variants (Stage 9, PDF 2.3): worked examples in the instructions, and where the instructions go
+VARIANTS = {"default": {}, "zero_shot": {"examples": 0}, "few_shot": {"examples": 3},
+            "in_message": {"placement": "in_message"}}
 OVERHEAD = 1.5   # live calls / clean-run estimate (format corrections, empty-reply retries): 9 / 6 in the Stage 7 tiny run
 
 
@@ -112,8 +114,11 @@ def run_plan(plan, cases, repeats, out_path, llm_factory=get_llm, verbose=True):
                    "cot": config.get("cot", True), "settings_requested": settings.as_dict(), "case_id": case["id"],
                    "category": case["category"], "repeat": r, "message": case["message"]}
             try:
+                v = VARIANTS[variant]
+                instructions = prompts.build_instructions(row["cot"], examples=v["examples"]) if "examples" in v else None
                 result = agent.run(case["message"], history=case.get("history", []), persona=persona,
-                                   settings=settings, cot=row["cot"], instructions=VARIANTS[variant], log=False)
+                                   settings=settings, cot=row["cot"], instructions=instructions,
+                                   placement=v.get("placement", "system"), log=False)
             except QuotaExhausted:
                 raise
             except LLMError as e:
