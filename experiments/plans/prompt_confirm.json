@@ -1,0 +1,21 @@
+{
+  "name": "prompt_confirm",
+  "description": "Stage 9 confirmation on the full set. The best value of each prompt factor on the core set was the shipped default (Thought lines on; one worked example: fewest format corrections; system prompt tied with in-message at 100%), so the combination to confirm is the default itself. in-message runs too, because the core set could not separate the two placements.",
+  "cases": "full",
+  "repeats": 1,
+  "configs": [
+    {
+      "id": "default-full",
+      "persona": "milo",
+      "provider": "gemini_native",
+      "model": "gemini-3.5-flash-lite"
+    },
+    {
+      "id": "in-message-full",
+      "persona": "milo",
+      "provider": "gemini_native",
+      "model": "gemini-3.5-flash-lite",
+      "variant": "in_message"
+    }
+  ]
+}

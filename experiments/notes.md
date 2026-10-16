@@ -28,7 +28,7 @@ Running notes: what we noticed while running the experiments, written down as it
 ## 2026-10-15: Stage 8 results (summaries in `experiments/summary/`)
 
 **Coverage.** Done: personas on Flash-Lite and qwen (full set, 102 runs each), the qwen settings sweep (144), the
-Flash-Lite sweep (67 of 72: the last 5 runs of the temperature control wait for the quota reset), the qwen variance
+Flash-Lite sweep (72, finished on 2026-10-16 with the follow-up below), the qwen variance
 plan (18). **Gemma was dropped:** only 5 of 19 runs succeeded (Google's free endpoint answered "temporarily
 unavailable" for over an hour; finished runs took 100 to 170 s per turn), and the assignment does not need it: "model
 type" is one setting to vary, which Flash-Lite vs qwen already covers, and qwen honours temperature and top_p live.
@@ -62,10 +62,53 @@ is actually applied. Nora's weak spot is format: most corrections on Flash-Lite 
 **reasoning high: 42%**, with 0.75 format corrections per turn, 18-word answers and 13 s per turn (vs 2.6 s). The
 traces show why: the hidden thinking used about 380 of the 400 max_tokens, so the visible reply was cut off
 (`finish: length`) or empty. It is an interaction, not "more reasoning is worse": one-factor-at-a-time kept
-max_tokens at 400. Follow-up config `reasoning-high-1200` (high reasoning, max_tokens 1200) runs after the reset.
+max_tokens at 400. **Follow-up (2026-10-16): high reasoning with max_tokens 1200 scored 12/12**, so the
+failure was the token budget, not the reasoning. The temperature control (a request identical to the baseline)
+finished 12/12 vs the baseline's 11/12: one case is the noise floor.
 
 **5. Temperature and variety** (`v_qwen.md`, Sami, 3 planning cases × 3 repeats): variety across repeats of the
 same question was 0.31 at temperature 0.0 and 0.84 at 1.4: at 0.0 the repeats are near copies, at 1.4 they are new
 wording each time. Answers were long (146 to 153 words) at both. But **0/18 passed**: qwen wrote every plan without
 looking up the package first (one step, no tool), so the plans could not respect the package limits. Temperature
 changed the wording, not the grounding.
+
+## 2026-10-16: Stage 9, prompt engineering (`prompt_flash.md`, Milo on Flash-Lite, core set)
+
+- **Quota:** Google's 429 said "retry in 20h18m", but the daily quota came back at about 10:00 Beirut (midnight
+  Pacific), as the docs say: the retry delay in the error is not the reset time.
+- One factor at a time from the shipped default (Thought lines, one worked example, instructions in the system prompt):
+
+  | variant | success | format corrections per turn | requests |
+  |---|---|---|---|
+  | default | 12/12 | 0.08 | 30 |
+  | no CoT (no Thought lines; hidden reasoning unchanged) | 10/12 | 0 | 22 |
+  | zero-shot (no worked example) | 12/12 | 0.33 | 36 |
+  | few-shot (3 examples) | 12/12 | 0.33 | 33 |
+  | in-message (instructions in front of the customer's message) | 12/12 | 0.08 | 29 |
+
+- **Chain-of-thought:** the only factor that cost success. Without the Thought line Milo skipped the lookup twice
+  (`missing tool: search_business_docs` ×2): fewer steps (1.83 vs 2.17) and fewer requests, but less grounding.
+  Writing "what I know and what I need next" seems to be what makes the model check before answering.
+- **Shots:** zero-shot and few-shot reached the same success but needed 4× the format corrections of the single
+  example. The traces show these were not wrong formats but Flash-Lite's empty "malformed" replies (4 each vs 1 for
+  the default; few-shot also had one reply cut off at max_tokens), the same quirk Stage 5 found to depend on the
+  prompt's structure (without a worked example, 3 of 6 identical requests came back empty). One example was the
+  sweet spot, which is the shipped block.
+- **Placement:** tied at the ceiling on the core set, so the confirmation run repeated both on the full set.
+
+## 2026-10-16: Stage 9 confirmation (`prompt_confirm.md`, Milo on Flash-Lite, full set of 34)
+
+| placement | success | format corrections per turn | requests | latency per turn |
+|---|---|---|---|---|
+| system prompt (shipped default) | 31/34 (91%) | 0.32 | 98 | 13.5 s |
+| in-message | 32/34 (94%) | 0.03 | 75 | 9.3 s |
+
+- The best value of every factor on the core set was the shipped default, so the confirmation run is the default
+  itself: 91% on the full set (94% for the same configuration in Stage 8: one case apart, i.e. noise).
+- **In-message placement made Flash-Lite far more reliable:** 1 format correction in 34 turns instead of 11, so 23%
+  fewer requests and faster turns, with the same success. The instructions right before the customer's message
+  seem to keep the text format in front of the model, so it stops attempting native tool calls (the empty
+  "malformed" replies).
+- **Decision: keep the system prompt.** PDF 2.2 asks for "a system prompt defining agent behavior and available
+  tools", and success is the same. In-message is the better choice for cost and latency on this model: a trade-off
+  for the reflection, not a change to ship.

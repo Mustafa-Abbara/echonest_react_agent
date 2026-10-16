@@ -66,9 +66,9 @@ every stage gate.
 | 2.3 | ≥ 2 personas with **different tasks** | Milo (concierge/leads), Nora (prices/quotes), Sami (story planning) | persona tests + live focus cases (5) | ✅ |
 | 2.3 | Personas defined by prompt traits (tone, vocabulary, style, values) | `personas.py` trait fields + prompt block | schema test (5) | ✅ |
 | 2.3 | Personas defined by **matching LLM settings** that take effect | intended settings + rationale per persona; persona cards show intended vs effective; compared on qwen (all live) and Flash-Lite (most dropped) | `personas_by_model.md`, `experiments/notes.md` §2 (8) | ✅ |
-| 2.3 | With vs without chain-of-thought | visible `Thought:` lines on/off | plan C (9) | ⏳ |
-| 2.3 | Zero-shot vs few-shot | 0 / 1 / 3 example trajectories | plan F (9) | ⏳ |
-| 2.3 | System prompt vs in-message instructions | instructions in `system` vs in front of the user message (system role works on all three models) | plan M (9) | ⏳ |
+| 2.3 | With vs without chain-of-thought | visible `Thought:` lines on/off (hidden reasoning fixed at Milo's low) | `prompt_flash.md` (9): CoT on 12/12, off 10/12 | ✅ |
+| 2.3 | Zero-shot vs few-shot | 0 / 1 / 3 worked examples (the shipped block keeps 1) | `prompt_flash.md` (9) | ✅ |
+| 2.3 | System prompt vs in-message instructions | instructions + tools in the system prompt vs in front of the customer's message | `prompt_flash.md`, `prompt_confirm.md` (9) | ✅ |
 | 2.3 | Vary temperature | qwen 0.0 / 0.7 / 1.4 (+ variance plan 0.0 vs 1.4); Flash-Lite control (ignored) | `s_qwen.md`, `v_qwen.md`, `s_flash.md` (8) | ✅ |
 | 2.3 | Vary top-p | qwen 0.3 / 0.9 / 1.0 | `s_qwen.md` (8) | ✅ |
 | 2.3 | Vary top-k | qwen (Ollama native) 1 / 40 | `s_qwen.md` (8) | ✅ |
@@ -822,7 +822,7 @@ Run G1, G2 and G5 three times each.
 
 **Architecture status:** Experiments (persona and settings) ✅.
 
-**Done 2026-10-15 (17 Flash-Lite runs pending, after the quota reset):**
+**Done 2026-10-15, finished 2026-10-16** (the last 17 Flash-Lite runs after the quota reset):
 - Plans in `experiments/plans/` (p_, s_, v_ × model), results in `experiments/results/`, summaries in
   `experiments/summary/` (incl. the combined `personas_by_model.md` and `model_type_core.md`, same cases for every
   model), findings in `experiments/notes.md`, a human-rating sheet in `experiments/ratings/ratings_sample_flash.csv`
@@ -834,7 +834,8 @@ Run G1, G2 and G5 three times each.
 - **Gemma dropped** (decision 2026-10-15): the PDF lists "model type" as one setting to vary, which Flash-Lite vs
   qwen covers, and qwen honours temperature and top_p live. Gemma's free endpoint returned 503 for over an hour (5 of
   19 runs succeeded) and took 60 to 170 s per call. Its plans and rows were removed.
-- After the quota reset: `s_flash.json` (5 control runs + the follow-up `reasoning-high-1200`, about 33–50 requests).
+- 2026-10-16: the temperature control finished (12/12: the noise floor) and the follow-up `reasoning-high-1200`
+  scored 12/12, confirming that high reasoning failed only because thinking used up max_tokens 400.
 - Headline findings: model type matters most (Flash-Lite 85–94% vs qwen 59–62%, qwen skips lookups); prompt traits
   set the voice (Sami twice as long on both models), live sampling settings add variety; temperature 0 / top_p 0.3 /
   top_k 1 are identical (greedy); high reasoning failed at max_tokens 400 because thinking used up the budget;
@@ -853,6 +854,17 @@ Run G1, G2 and G5 three times each.
 **✅ Gate:** results for CoT, shots and placement, plus the confirmation run. Commit: *"Stage 9: prompt-engineering results"*.
 
 **Architecture status:** Experiments ✅.
+
+**Done 2026-10-16:**
+- Variants: `prompts.build_instructions(examples=0|1|3)` (two extra worked examples: a lead and a NO_MATCH, with fixed
+  Observations for the tools that write logs), `graph.run(placement="in_message")`, runner variants `zero_shot`,
+  `few_shot`, `in_message` (CoT on/off already existed). 132 offline tests pass.
+- `prompt_flash` (Milo, Flash-Lite, core): default 12/12; no CoT 10/12 (skips lookups); zero-shot and few-shot 12/12
+  but 4× the format corrections (empty "malformed" replies); in-message 12/12.
+- `prompt_confirm` (full set): the best combination is the shipped default: 31/34; in-message 32/34 with 1 format
+  correction instead of 11 (23% fewer requests). The system prompt stays the shipped placement (PDF 2.2); in-message is
+  reported as the cheaper option for this model. Notes: `experiments/notes.md`.
+- Quota: about 400 Flash-Lite requests on 2026-10-16 (it reset at 10:00 Beirut, not when the 429 said).
 
 ---
 
