@@ -99,6 +99,12 @@ Configuration only: set `LLM_PROVIDER` / `LLM_MODEL` in `.env` to an entry of
 `python scripts/probe_settings.py --provider <p> --model <m>`, then check with `python scripts/smoke_llm.py`. Only
 `echonest_agent/config.py` and `llm.py` contain provider code; `tests/test_llm.py` fails if it appears elsewhere.
 
+**Drill (2026-10-16):** with only two lines added to `.env` (`LLM_PROVIDER=ollama_native`,
+`LLM_MODEL=qwen3:4b-instruct`) and no code change, the smoke call, the 122 offline tests and the agent ran on the local
+model (`experiments/plans/switch_drill.json`: 1 of 3 cases passed, qwen's known failures); with `.env` restored, the
+default Flash-Lite passed 3 of 3 (`switch_drill_flash.json`). A fresh clone with a fresh venv and a new `.env` installed
+in about a minute and passed the 122 tests, the smoke call and the notebook's Restart & Run All.
+
 ## How to run
 
 ```bash

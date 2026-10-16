@@ -84,7 +84,7 @@ every stage gate.
 | 1, 2.5 | Evaluate which agent + configuration worked best | scored comparison on the eval set | notebook §7–8, README Results (10) | ✅ |
 | 2.5 | Five reflection questions | notebook §8, each claim citing a plan and run ids | `react_agent.ipynb` (10); human ratings in `experiments/ratings/` | ✅ |
 | 1 | Final deliverable works as an assistant | Gradio app with persona selector (`app.py` over `agent.respond()`) | M1–M2 for every persona (6): `docs/evidence/stage6_live_chat.jsonl`, UI screenshots 09–11; final screenshots (12) | ✅ |
-| (user) | Switching model/provider needs no code change | config + capability files + LLM layer; grep test | switch drill (1, 11) | ⏳ |
+| (user) | Switching model/provider needs no code change | config + capability files + LLM layer; grep test | switch drill (1, 11): `switch_drill*.json`, README | ✅ |
 
 ---
 
@@ -924,6 +924,19 @@ Run G1, G2 and G5 three times each.
    The only matches should be the test/README pattern lines. Check that no notebook output prints a key.
 
 **✅ Gate:** a fresh clone, a fresh venv and a new `.env` run everything. The switch drill passes. The history is clean. Commit; **push only when you ask for it.**
+
+**Done 2026-10-16:**
+- Removed the A3 leftovers (notebook `business_agent.ipynb`, `tests/nb_loader.py`, `tests/test_tools.py`,
+  `tests/router_cases.json`, A3 evidence and screenshots 00–08; all at tag `a4-start`; `export_app.py` went in Stage 6).
+  The A4 tool tests already covered the tools. 122 offline tests pass.
+- `requirements.txt` was already pinned; `requirements-dev.txt` now pins pandas (the notebook's tables).
+- Notebook Restart & Run All (`RUN_LIVE = False`): no errors; no key-like strings in the outputs.
+- Switch drill: `.env` only → qwen3:4b-instruct: smoke call, 122 tests and the agent ran (1/3 cases: qwen's known
+  failures); `.env` restored → Flash-Lite 3/3 (`experiments/plans/switch_drill*.json`; recorded in the README). No
+  `probe --quick`: qwen was fully probed in Stage 0b, and a quick probe would overwrite its capability file.
+- Fresh clone (committed state) + fresh Python 3.12 venv + new `.env`: install about 1 minute, 122 tests, smoke call,
+  `import app`, notebook Restart & Run All: all passed. The scratch copies holding the key were deleted afterwards.
+- History scan: only the test/README pattern lines match.
 
 ---
 
