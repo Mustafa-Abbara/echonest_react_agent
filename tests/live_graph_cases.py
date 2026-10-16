@@ -59,7 +59,9 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--only", help="comma-separated case ids, e.g. G1,G5")
     ap.add_argument("--repeats", type=int, help="override every case's repeat count")
+    ap.add_argument("--evidence", help="file to append the rows to (default: the stage's evidence file)")
     args = ap.parse_args()
+    evidence = ROOT / args.evidence if args.evidence else EVIDENCE
     cases = [c for c in CASES if not args.only or c["id"] in args.only.split(",")]
 
     tools.LOGS_DIR = Path(tempfile.mkdtemp(prefix="echonest_live_"))
@@ -67,7 +69,7 @@ def main():
     agent = graph.ReActAgent(verbose=True)
     settings = LLMSettings(max_tokens=600, reasoning_effort="low")
     print(f"Model: {agent.llm}\n")
-    EVIDENCE.parent.mkdir(parents=True, exist_ok=True)
+    evidence.parent.mkdir(parents=True, exist_ok=True)
 
     summary = []
     for case in cases:
@@ -82,7 +84,7 @@ def main():
             ok, what = case["check"](result)
             ok = bool(ok)
             summary.append((case["id"], i + 1, ok, what, result.steps))
-            with EVIDENCE.open("a", encoding="utf-8") as f:
+            with evidence.open("a", encoding="utf-8") as f:
                 f.write(json.dumps({"time": datetime.now(timezone.utc).isoformat(timespec="seconds"),
                                     "model": agent.llm.profile.model, "provider": agent.llm.profile.provider,
                                     "case": case["id"], "run": i + 1, "message": case["message"], "pass": ok,
@@ -95,7 +97,7 @@ def main():
     for cid, run, ok, what, steps in summary:
         print(f"{'✅' if ok else '❌'} {cid} run {run}: {what} ({steps} LLM calls)")
     passed = sum(1 for _, _, ok, _, _ in summary if ok)
-    print(f"\n{passed}/{len(summary)} passed; {agent.llm.requests} requests used. Traces → {EVIDENCE.relative_to(ROOT)}")
+    print(f"\n{passed}/{len(summary)} passed; {agent.llm.requests} requests used. Traces → {evidence.relative_to(ROOT)}")
     return 0 if passed == len(summary) else 1
 
 

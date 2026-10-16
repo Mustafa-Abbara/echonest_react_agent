@@ -10,7 +10,7 @@ business facts in its prompt: it looks them up with tools, captures leads, and l
 | | |
 |---|---|
 | 📓 Main notebook | [`react_agent.ipynb`](react_agent.ipynb): use case, ReAct loop, personas, instructions, results, **reflection** |
-| 💬 Working assistant | `python app.py`: Gradio chat with a persona selector and the agent's steps shown ([screenshots](docs/screenshots)) |
+| 💬 Working assistant | `python app.py`: Gradio chat with a persona selector and the agent's steps shown ([screenshots 09–14](docs/screenshots)) |
 | 🧪 Experiments | [`experiments/`](experiments): plans, one row per run, summaries, [notes](experiments/notes.md) |
 | 🗺️ Plan | [`docs/planning/Roadmap.md`](docs/planning/Roadmap.md) (stages and the requirements table) |
 
@@ -24,7 +24,7 @@ business facts in its prompt: it looks them up with tools, captures leads, and l
 | Configuration experimentation and comparison (15) | [`experiments/`](experiments); notebook §7 | temperature, top-p, top-k, both penalties, max tokens, reasoning, model type; CoT, zero/few-shot, system vs in-message |
 | Clear instructions design (10) | [`echonest_agent/prompts.py`](echonest_agent/prompts.py); notebook §5 | single-purpose rules, inputs/outputs, worked example, no persona conflict (tests) |
 | Creativity, clarity, reflection (15) | notebook §8 | the five questions answered with plan and run ids |
-| Working assistant (§1) | [`app.py`](app.py), [`echonest_agent/agent.py`](echonest_agent/agent.py) | memory and lead flow, live for every persona (`docs/evidence/stage6_live_chat.jsonl`) |
+| Working assistant (§1) | [`app.py`](app.py), [`echonest_agent/agent.py`](echonest_agent/agent.py) | final run on the submission code: G1–G6 12/12, memory and lead flow M1–M2 5/6 (`docs/evidence/stage12_final_*.jsonl`); UI screenshots 09–14 |
 
 ## Architecture
 
@@ -129,6 +129,8 @@ for t in tests/test_*.py; do python "$t" > /dev/null || echo "FAILED: $t"; done
 - Automatic scoring uses fixed patterns and can miss a correct answer (one known false negative, documented in the
   notebook §9); human ratings cover 30 answers by one rater (the author).
 - Milo's max_tokens 400 is tight: once his hidden reasoning used 309 tokens and cut a reply (about 800 would be safer).
+- Persona vs rule tension varies from run to run: in the final run Sami answered a project request with a plan
+  instead of asking for contact details first (he passed the same test in Stage 6).
 - The free tier allows 500 Flash-Lite requests a day; the experiments took two quota days.
 
 ## Key safety

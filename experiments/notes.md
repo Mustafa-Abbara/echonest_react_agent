@@ -133,3 +133,17 @@ changed the wording, not the grounding.
   answer in the set, 5/5: the photo split sums to the 60-photo limit and uses all 3 recordings), but on plain price
   questions she sounded like Nora (2/5). A persona's voice is weakest outside its own focus.
 - The ratings confirm two automatic failures: Nora and Sami declined film restoration without logging the demand.
+
+## 2026-10-16: final run on the submission code (Stage 12)
+
+- **G1–G6: 12/12** (G1, G2, G5 three times each; `docs/evidence/stage12_final_graph.jsonl`).
+- **M1–M2: 5/6** (`docs/evidence/stage12_final_chat.jsonl`). All three personas remembered the name (M1); Milo and
+  Nora handled the 3-turn lead perfectly. **Sami failed M2:** to "I'd like a Memory Capsule for my sister's
+  graduation" he wrote a full plan (60 photos, 3 recordings, correct) instead of asking for name and email, then on
+  "My name is Rania" called `record_customer_interest` without an email (the tool rejected it and nothing was saved)
+  before asking for it; turn 3 saved the lead correctly. He passed the same test in Stage 6. It is the persona vs
+  rule tension the human ratings showed (a persona's voice is strongest on its own task), appearing run to run;
+  reported, not tuned after the experiments.
+- **UI check:** in the Gradio app two first requests stalled on the network and the 120 s timeout plus retry (the
+  Stage 4 fix) recovered both without an error; screenshots `docs/screenshots/12`–`14` (Milo: NO_MATCH then
+  `record_feedback`; Sami: the lookup, then a plan whose photo split sums to the 60-photo limit).

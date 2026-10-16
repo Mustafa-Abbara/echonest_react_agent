@@ -1,7 +1,7 @@
 # Handoff: moving to the Mac in the middle of Stage 4 (2026-10-12)
 
-> **Update 2026-10-15:** Stages 4, 0b and 5–11 are done on the Mac (see their "Done" notes in the roadmap). Stage 0b uses
-> `qwen3:4b-instruct` (this Mac has 8 GB of RAM). Next: Stage 12 (submission). Run the app with `python app.py`. To use the local model, start Ollama first
+> **Update 2026-10-15:** All stages (0–12) are done on the Mac (see their "Done" notes in the roadmap). Stage 0b uses
+> `qwen3:4b-instruct` (this Mac has 8 GB of RAM). Next: submit (repo public or grader invited; tag `a4-final`). Run the app with `python app.py`. To use the local model, start Ollama first
 > (`ollama serve`).
 
 Written at the end of the Windows session so a new session (on the Mac) can continue without that conversation.
@@ -26,7 +26,7 @@ The older [HANDOFF_FROM_A3.md](HANDOFF_FROM_A3.md) explains the A3 starting poin
 | 9 Prompt-engineering experiments | ✅ 2026-10-16 (CoT, shots, placement + confirmation) | "Stage 9: prompt-engineering results" |
 | 10 Analysis, reflection, README | ✅ 2026-10-16 (`react_agent.ipynb`, README) | "Stage 10: notebook, reflection and README" |
 | 11 Cleanup, Run All, fresh clone, switch drill | ✅ 2026-10-16 | "Stage 11: ..." |
-| 12 | not started | – |
+| 12 Submission | ✅ 2026-10-16 (final run, screenshots, tag `a4-final`) | "Stage 12: final run and submission" |
 
 85 offline tests pass (Stages 0–3). Stage 4's `tests/test_graph.py` (14 offline tests) and
 `tests/live_graph_cases.py` (G1–G6, about 35 requests) have **never been run**. Expect small fixes.

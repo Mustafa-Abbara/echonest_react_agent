@@ -946,17 +946,24 @@ Run G1, G2 and G5 three times each.
 2. Optional: a short demo video (persona switch → tool trajectory → experiment tables), and an update to the HF Space (the ZeroGPU placeholder from A3 is still needed; the Space secret is now `GEMINI_API_KEY` + `LLM_MODEL`).
 3. Make the repo public, or invite the grader. Tag it `a4-final`.
 
+**Done 2026-10-16:** final run on the submission code: G1–G6 12/12 (`docs/evidence/stage12_final_graph.jsonl`), M1–M2
+5/6 (`stage12_final_chat.jsonl`; Sami answered a project request with a plan before asking for contact details,
+documented in the notes and README limitations). UI trace screenshots for every persona: `docs/screenshots/09`–`14`.
+Optional video and Hugging Face Space: skipped (not required by the PDF). The live scripts take `--evidence` so a final
+run doesn't mix into earlier stages' files. Tag `a4-final` on the submission commit; making the repo public or
+inviting the grader is the user's step.
+
 **Final checklist (one-to-one with the grading)**
 
 | Grading item | Pts | Where it's proved | Done |
 |---|---|---|---|
-| Use-case summary and write-up (goal, audience, tools, constraints) | 10 | README §Use case; notebook §1 | ☐ |
-| ReAct logic manually implemented: system prompt with tools, action detection, tool execution, observation loop, final-answer parsing | 30 | `react_parser.py` + fixtures; `graph.py` + diagram; offline graph tests; traces | ☐ |
-| Persona design (prompt traits + matching settings, ≥ 2) | 20 | `personas.py`; persona cards (intended vs effective settings); Stage 5 tests | ☐ |
-| Configuration experimentation and comparison (settings + CoT, shots, placement, logged) | 15 | `experiments/` plans, results, summaries; Stage 0 support table | ☐ |
-| Clear instructions design (one purpose per rule, inputs/outputs, worked example, no conflict) | 10 | `prompts.py` instructions block; parse test of the example; lint test | ☐ |
-| Creativity, clarity, reflection (5 questions) | 15 | Notebook §Reflection; README | ☐ |
-| Working assistant | — | Gradio app; screenshots | ☐ |
+| Use-case summary and write-up (goal, audience, tools, constraints) | 10 | `docs/use_case.md`; notebook §1 | ☑ |
+| ReAct logic manually implemented: system prompt with tools, action detection, tool execution, observation loop, final-answer parsing | 30 | `react_parser.py` + fixtures; `graph.py` + diagram; offline graph tests; traces | ☑ |
+| Persona design (prompt traits + matching settings, ≥ 2) | 20 | `personas.py`; persona cards (intended vs effective settings); Stage 5 tests | ☑ |
+| Configuration experimentation and comparison (settings + CoT, shots, placement, logged) | 15 | `experiments/` plans, results, summaries; Stage 0 support table | ☑ |
+| Clear instructions design (one purpose per rule, inputs/outputs, worked example, no conflict) | 10 | `prompts.py` instructions block; parse test of the example; lint test | ☑ |
+| Creativity, clarity, reflection (5 questions) | 15 | Notebook §Reflection; README | ☑ |
+| Working assistant | — | Gradio app; screenshots | ☑ |
 
 ---
 

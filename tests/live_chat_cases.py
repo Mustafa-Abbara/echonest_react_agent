@@ -62,11 +62,13 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--only", help="comma-separated persona ids")
     ap.add_argument("--cases", help="comma-separated case ids, e.g. M2")
+    ap.add_argument("--evidence", help="file to append the rows to (default: the stage's evidence file)")
     args = ap.parse_args()
+    evidence = ROOT / args.evidence if args.evidence else EVIDENCE
     tools.LOGS_DIR = Path(tempfile.mkdtemp(prefix="echonest_live_"))
     graph.TRACES_LOG = tools.LOGS_DIR / "traces.jsonl"
     print(f"Model: {agent.get_agent().llm}")
-    EVIDENCE.parent.mkdir(parents=True, exist_ok=True)
+    evidence.parent.mkdir(parents=True, exist_ok=True)
 
     summary = []
     for p in personas.PERSONAS.values():
@@ -82,7 +84,7 @@ def main():
                 ok, what = check(reply)
                 ok = bool(ok) and reply.error is None
                 print(f"👤 {message}\n🔧 {used(reply)}\n🤖 {reply.answer}\n{'✅' if ok else '❌'} turn {i}: {what}")
-                with EVIDENCE.open("a", encoding="utf-8") as f:
+                with evidence.open("a", encoding="utf-8") as f:
                     f.write(json.dumps({"time": datetime.now(timezone.utc).isoformat(timespec="seconds"),
                                         "model": agent.get_agent().llm.profile.model, "persona": p.id,
                                         "case": case["id"], "turn": i, "message": message,
@@ -100,7 +102,7 @@ def main():
         print(f"{'✅' if ok else '❌'} {name} · {cid}" + (f" (failed at {failed_at})" if failed_at else ""))
     passed = sum(1 for _, _, ok, _ in summary if ok)
     print(f"\n{passed}/{len(summary)} passed; {agent.get_agent().llm.requests} requests used. "
-          f"Turns → {EVIDENCE.relative_to(ROOT)}")
+          f"Turns → {evidence.relative_to(ROOT)}")
     return 0 if passed == len(summary) else 1
 
 
