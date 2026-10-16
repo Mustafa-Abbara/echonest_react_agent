@@ -112,3 +112,24 @@ changed the wording, not the grounding.
 - **Decision: keep the system prompt.** PDF 2.2 asks for "a system prompt defining agent behavior and available
   tools", and success is the same. In-message is the better choice for cost and latency on this model: a trade-off
   for the reflection, not a change to ship.
+
+## 2026-10-16: human ratings (`experiments/ratings/ratings_sample_flash.csv`)
+
+30 answers from `p_flash` (10 cases × 3 personas), rated 1–5 by the author for helpfulness and persona fit.
+
+| persona | helpfulness | persona fit |
+|---|---|---|
+| Milo | 4.6 | 4.7 |
+| Nora | 4.4 | 4.9 |
+| Sami | 4.5 | 3.9 |
+
+- **Milo** was the most helpful, matching his top automatic score. One answer was cut mid-sentence
+  (`p_flash:milo-flash:L1:0`, rated 3/4): the trace shows `finish: length`, with his *low* reasoning using 309 of his 400
+  max_tokens. It is the Stage 8 reasoning/max_tokens interaction again, at a lower level: 400 is too tight for Milo
+  (about 800 would be safer). Not changed after the fact; reported.
+- **Nora** was the most in character (4.9), but precise turned cold once: a thank-you got two flat sentences (3/4).
+  On "help me plan" she gave only specs and a contact request (3/5).
+- **Sami** was the least consistent in character (3.9): strong on her own task (the graduation plan was rated the best
+  answer in the set, 5/5: the photo split sums to the 60-photo limit and uses all 3 recordings), but on plain price
+  questions she sounded like Nora (2/5). A persona's voice is weakest outside its own focus.
+- The ratings confirm two automatic failures: Nora and Sami declined film restoration without logging the demand.

@@ -1,56 +1,56 @@
 run_id,config_id,persona,case_id,message,answer,helpfulness_1to5,persona_fit_1to5,notes
-p_flash:milo-flash:F2:0,milo-flash,milo,F2,How long does the Legacy Edition take?,The Legacy Edition takes 3 to 4 weeks to complete because it includes recorded interviews. Is this for a special occasion or a particular person you have in mind?,,,
-p_flash:milo-flash:P2:0,milo-flash,milo,P2,What's the price difference between the Event Story and the Life Timeline?,"The Event Story is $149 and the Life Timeline is $299, making the Life Timeline $150 more since it covers memories across many years into a chronological story.",,,
-p_flash:milo-flash:P3:0,milo-flash,milo,P3,How much does a Corporate Story cost?,"The Corporate Story doesn't have a fixed price since every organization is unique, so our team puts together a custom quote after a quick consultation. If you'd like, I can connect you with our team to talk about your company's project!",,,
-p_flash:milo-flash:N1:0,milo-flash,milo,N1,Do you sell gift cards?,"We don't currently offer gift cards, but I've passed your question along to our team so they can look into it and follow up with you!",,,
-p_flash:milo-flash:O1:0,milo-flash,milo,O1,Can you restore damaged film negatives?,"We don't currently offer film restoration, but I've passed your request along to our team in case we add it in the future!",,,
-p_flash:milo-flash:L1:0,milo-flash,milo,L1,I'd love to make one for my parents' 40th anniversary.,"A 40th anniversary is such a wonderful milestone to celebrate! Our Event Story package would be a lovely fit for that, bringing together up to 150 photos and personal messages for $149. To get things started",,,
-p_flash:milo-flash:B1:0,milo-flash,milo,B1,"Your team was so helpful with my mother's timeline, thank you!","Thank you so much for your kind words! We are thrilled to hear our team was helpful with your mother's timeline, and it was a true pleasure working on such a special project for your family.",,,
-p_flash:milo-flash:G1:0,milo-flash,milo,G1,Hi!,"Hello and welcome to EchoNest! I'm Milo, your Memory Concierge. Are you looking to turn some special photos, voice notes, or stories into a keepsake today?",,,
-p_flash:milo-flash:A1:0,milo-flash,milo,A1,كم سعر Legacy Edition؟,يبلغ سعر باقة Legacy Edition هو 499 دولاراً، وهي خدمتنا المميزة لحفظ قصة حياة شخص ما من خلال الصور والوثائق وثلاث جلسات مقابلات مسجلة. هل تفكر في توثيق قصة شخص عزيز عليك؟,,,
-p_flash:milo-flash:C1:0,milo-flash,milo,C1,Can you help me plan a Memory Capsule for my daughter's graduation?,"A Memory Capsule is a wonderful way to celebrate your daughter's graduation! It includes up to 60 photos and 3 voice recordings for $79, taking about 5 to 10 business days to create. To get started, could you please share your name and email address?",,,
+p_flash:milo-flash:F2:0,milo-flash,milo,F2,How long does the Legacy Edition take?,The Legacy Edition takes 3 to 4 weeks to complete because it includes recorded interviews. Is this for a special occasion or a particular person you have in mind?,5,5,Correct timeline with reason; warm follow-up question. Textbook Milo.
+p_flash:milo-flash:P2:0,milo-flash,milo,P2,What's the price difference between the Event Story and the Life Timeline?,"The Event Story is $149 and the Life Timeline is $299, making the Life Timeline $150 more since it covers memories across many years into a chronological story.",5,4,Correct math and a useful why. Short but a bit flat; no warm touch or follow-up.
+p_flash:milo-flash:P3:0,milo-flash,milo,P3,How much does a Corporate Story cost?,"The Corporate Story doesn't have a fixed price since every organization is unique, so our team puts together a custom quote after a quick consultation. If you'd like, I can connect you with our team to talk about your company's project!",5,5,Correct (custom quote); clear next step offered.
+p_flash:milo-flash:N1:0,milo-flash,milo,N1,Do you sell gift cards?,"We don't currently offer gift cards, but I've passed your question along to our team so they can look into it and follow up with you!",5,5,Clear no + logged for team. Good.
+p_flash:milo-flash:O1:0,milo-flash,milo,O1,Can you restore damaged film negatives?,"We don't currently offer film restoration, but I've passed your request along to our team in case we add it in the future!",5,5,Clear decline and logged. Could have pointed to what EchoNest does offer.
+p_flash:milo-flash:L1:0,milo-flash,milo,L1,I'd love to make one for my parents' 40th anniversary.,"A 40th anniversary is such a wonderful milestone to celebrate! Our Event Story package would be a lovely fit for that, bringing together up to 150 photos and personal messages for $149. To get things started",3,4,"TRUNCATED mid-sentence (""To get things started"") - likely token limit. Right package and price up to that point."
+p_flash:milo-flash:B1:0,milo-flash,milo,B1,"Your team was so helpful with my mother's timeline, thank you!","Thank you so much for your kind words! We are thrilled to hear our team was helpful with your mother's timeline, and it was a true pleasure working on such a special project for your family.",4,5,Warm and gracious. No invitation for a next project or review; slightly long for Milo.
+p_flash:milo-flash:G1:0,milo-flash,milo,G1,Hi!,"Hello and welcome to EchoNest! I'm Milo, your Memory Concierge. Are you looking to turn some special photos, voice notes, or stories into a keepsake today?",5,5,Ideal greeting: name + role + one open question.
+p_flash:milo-flash:A1:0,milo-flash,milo,A1,كم سعر Legacy Edition؟,يبلغ سعر باقة Legacy Edition هو 499 دولاراً، وهي خدمتنا المميزة لحفظ قصة حياة شخص ما من خلال الصور والوثائق وثلاث جلسات مقابلات مسجلة. هل تفكر في توثيق قصة شخص عزيز عليك؟,5,5,Replied in Arabic; correct price; warm question. Minor grammar redundancy (يبلغ ... هو).
+p_flash:milo-flash:C1:0,milo-flash,milo,C1,Can you help me plan a Memory Capsule for my daughter's graduation?,"A Memory Capsule is a wonderful way to celebrate your daughter's graduation! It includes up to 60 photos and 3 voice recordings for $79, taking about 5 to 10 business days to create. To get started, could you please share your name and email address?",4,4,Facts correct but skips the planning the user asked for and jumps to collecting contact info. A one-line idea would fit Milo.
 p_flash:nora-flash:F2:0,nora-flash,nora,F2,How long does the Legacy Edition take?,"The Legacy Edition takes 3 to 4 weeks to complete because it includes interviews.
 
 - Timeline: 3 to 4 weeks from material upload
 - Price: $499
-- Includes up to 3 recorded interview sessions",,,
+- Includes up to 3 recorded interview sessions",5,5,Answer first then precise bullets. Repeats the timeline twice.
 p_flash:nora-flash:P2:0,nora-flash,nora,P2,What's the price difference between the Event Story and the Life Timeline?,"The price difference is $150.
 
 - Event Story: $149
 - Life Timeline: $299
-- Difference: $150",,,
+- Difference: $150",5,5,Number-first exactly as designed. Last bullet repeats the lead.
 p_flash:nora-flash:P3:0,nora-flash,nora,P3,How much does a Corporate Story cost?,"The Corporate Story has no fixed price and is quoted individually following a consultation.
 - Custom quote based on project scope
 - Led by Maya Haddad
-- 50 percent deposit required at booking",,,
+- 50 percent deposit required at booking",5,5,Correct and adds useful specifics (contact + deposit). No offer to book a consultation.
 p_flash:nora-flash:N1:0,nora-flash,nora,N1,Do you sell gift cards?,"We do not currently sell gift cards.
 - Your question has been logged for our team.
-- We will contact you if this option becomes available.",,,
+- We will contact you if this option becomes available.",4,5,Correct and logged. Promises follow-up without having contact details.
 p_flash:nora-flash:O1:0,nora-flash,nora,O1,Can you restore damaged film negatives?,"EchoNest does not currently offer film negative restoration.
 - We focus on digital stories from photos, voice recordings, and written memories.
-- Our services include the Memory Capsule, Event Story, Life Timeline, Legacy Edition, and Corporate Story.",,,
+- Our services include the Memory Capsule, Event Story, Life Timeline, Legacy Edition, and Corporate Story.",4,5,Clear decline + redirect to services. Did not log the request (Milo did) - inconsistent handling across personas.
 p_flash:nora-flash:L1:0,nora-flash,nora,L1,I'd love to make one for my parents' 40th anniversary.,"The Event Story package is $149 for anniversaries and includes up to 150 photos and personal messages.
 - 50% deposit required at booking, remaining balance upon delivery
 - Timeline: 5 to 10 business days after upload
-Please share your name and email address so we can begin your project.",,,
-p_flash:nora-flash:B1:0,nora-flash,nora,B1,"Your team was so helpful with my mother's timeline, thank you!",Thank you for the feedback. We are glad the timeline project was successful.,,,
-p_flash:nora-flash:G1:0,nora-flash,nora,G1,Hi!,"Hello. I am Nora, the Package Specialist at EchoNest. I can provide exact prices, package details, and payment terms for our personal story packages. How may I assist you today?",,,
+Please share your name and email address so we can begin your project.",5,5,Right package; price/terms/timeline up front; clear next step. Strong.
+p_flash:nora-flash:B1:0,nora-flash,nora,B1,"Your team was so helpful with my mother's timeline, thank you!",Thank you for the feedback. We are glad the timeline project was successful.,3,4,Correct register but cold to the point of curt; precise should not mean unfriendly. No next step.
+p_flash:nora-flash:G1:0,nora-flash,nora,G1,Hi!,"Hello. I am Nora, the Package Specialist at EchoNest. I can provide exact prices, package details, and payment terms for our personal story packages. How may I assist you today?",5,5,Sets expectations precisely. Good.
 p_flash:nora-flash:A1:0,nora-flash,nora,A1,كم سعر Legacy Edition؟,"سعر باقة Legacy Edition هو 499 دولاراً.
 
 - السعر: 499 دولاراً
 - تتضمن حتى 3 مقابلات مسجلة
-- المدة: من 3 إلى 4 أسابيع",,,
+- المدة: من 3 إلى 4 أسابيع",5,5,Arabic; price first; useful bullets. Price stated twice.
 p_flash:nora-flash:C1:0,nora-flash,nora,C1,Can you help me plan a Memory Capsule for my daughter's graduation?,"The Memory Capsule costs $79.
 - Up to 60 photos and 3 voice recordings
 - 50% deposit at booking, balance on delivery
 - 5 to 10 business days timeline
 
-Please provide your name and email address to proceed.",,,
-p_flash:sami-flash:F2:0,sami-flash,sami,F2,How long does the Legacy Edition take?,"The Legacy Edition takes 3 to 4 weeks to complete because it includes up to three recorded online interview sessions along with your photographs, documents, and memories.",,,
-p_flash:sami-flash:P2:0,sami-flash,sami,P2,What's the price difference between the Event Story and the Life Timeline?,"The Event Story costs $149 and the Life Timeline costs $299, so there is a price difference of $150 between them.",,,
-p_flash:sami-flash:P3:0,sami-flash,sami,P3,How much does a Corporate Story cost?,"The Corporate Story does not have a fixed price, as each project is custom-quoted following a consultation to perfectly capture your organization's unique milestones, founder journeys, and employee celebrations!",,,
-p_flash:sami-flash:N1:0,sami-flash,sami,N1,Do you sell gift cards?,"We do not currently sell gift cards, but I have passed your request along to our team so they can follow up with you on any gift options we might be able to arrange!",,,
-p_flash:sami-flash:O1:0,sami-flash,sami,O1,Can you restore damaged film negatives?,"While we love helping you shape your memories into vivid chapters, we do not currently offer film restoration services at EchoNest!",,,
+Please provide your name and email address to proceed.",3,5,"In character, but ignores ""help me plan"" entirely - only specs and a contact request."
+p_flash:sami-flash:F2:0,sami-flash,sami,F2,How long does the Legacy Edition take?,"The Legacy Edition takes 3 to 4 weeks to complete because it includes up to three recorded online interview sessions along with your photographs, documents, and memories.",5,3,Correct and clear but neutral; no enthusiasm or planning flavor.
+p_flash:sami-flash:P2:0,sami-flash,sami,P2,What's the price difference between the Event Story and the Life Timeline?,"The Event Story costs $149 and the Life Timeline costs $299, so there is a price difference of $150 between them.",5,2,Correct but reads like Nora without bullets; nothing Sami about it.
+p_flash:sami-flash:P3:0,sami-flash,sami,P3,How much does a Corporate Story cost?,"The Corporate Story does not have a fixed price, as each project is custom-quoted following a consultation to perfectly capture your organization's unique milestones, founder journeys, and employee celebrations!",4,4,Correct and upbeat. No next step (offer consultation / outline ideas).
+p_flash:sami-flash:N1:0,sami-flash,sami,N1,Do you sell gift cards?,"We do not currently sell gift cards, but I have passed your request along to our team so they can follow up with you on any gift options we might be able to arrange!",4,4,"Correct and logged. ""Gift options we might be able to arrange"" slightly overpromises."
+p_flash:sami-flash:O1:0,sami-flash,sami,O1,Can you restore damaged film negatives?,"While we love helping you shape your memories into vivid chapters, we do not currently offer film restoration services at EchoNest!",4,4,Clear decline with a Sami touch. Not logged and no redirect to what is offered.
 p_flash:sami-flash:L1:0,sami-flash,sami,L1,I'd love to make one for my parents' 40th anniversary.,"Let's weave four decades of love and laughter into a breathtaking digital keepsake for your parents' 40th anniversary! 
 
 Here is a proposed chapter outline for your Event Story package (which includes up to 150 photos and personal messages):
@@ -60,10 +60,10 @@ Here is a proposed chapter outline for your Event Story package (which includes 
 3. **Chapter 3: Milestones & Memories** — Highlight past anniversaries, celebrations, and quiet moments of partnership through the decades. *Question to ask:* ""What secret kept your laughter alive through the years?""
 4. **Chapter 4: Wishes for the Future** — Collect warm audio or text messages from family and friends sharing their favorite wishes for the couple. 
 
-To bring this beautiful narrative to life, could you please share your name and email address so we can get started?",,,
-p_flash:sami-flash:B1:0,sami-flash,sami,B1,"Your team was so helpful with my mother's timeline, thank you!","It brings us so much joy to hear that your mother's timeline turned out beautifully! Designing that life story was a true privilege, and we are thrilled we could help you preserve those precious memories in such a meaningful shape.",,,
-p_flash:sami-flash:G1:0,sami-flash,sami,G1,Hi!,"Hello and welcome to EchoNest! I'm Sami, your story planner, and I'm so excited to help you shape your cherished photos, voice recordings, and memories into an unforgettable digital story. What kind of project or package are you thinking about exploring today?",,,
-p_flash:sami-flash:A1:0,sami-flash,sami,A1,كم سعر Legacy Edition؟,يبلغ سعر باقة Legacy Edition هو 499 دولاراً، وهي خدمتنا المميزة لحفظ قصة حياة شخص ما من خلال الصور والوثائق وما يصل إلى 3 جلسات مقابلة مسجلة عبر الإنترنت!,,,
+To bring this beautiful narrative to life, could you please share your name and email address so we can get started?",4,5,"Great plan, right package. Price never mentioned. Implies voice recordings are part of Event Story (only ""personal messages"" listed). ""Black-and-white"" wedding photos odd for ~1986."
+p_flash:sami-flash:B1:0,sami-flash,sami,B1,"Your team was so helpful with my mother's timeline, thank you!","It brings us so much joy to hear that your mother's timeline turned out beautifully! Designing that life story was a true privilege, and we are thrilled we could help you preserve those precious memories in such a meaningful shape.",4,4,Warm and enthusiastic. No plan-like hook (e.g. suggesting a next story).
+p_flash:sami-flash:G1:0,sami-flash,sami,G1,Hi!,"Hello and welcome to EchoNest! I'm Sami, your story planner, and I'm so excited to help you shape your cherished photos, voice recordings, and memories into an unforgettable digital story. What kind of project or package are you thinking about exploring today?",5,5,Enthusiastic and on-role. A touch long.
+p_flash:sami-flash:A1:0,sami-flash,sami,A1,كم سعر Legacy Edition؟,يبلغ سعر باقة Legacy Edition هو 499 دولاراً، وهي خدمتنا المميزة لحفظ قصة حياة شخص ما من خلال الصور والوثائق وما يصل إلى 3 جلسات مقابلة مسجلة عبر الإنترنت!,5,3,Arabic and correct. Near-identical to Milo's reply; no planning or follow-up.
 p_flash:sami-flash:C1:0,sami-flash,sami,C1,Can you help me plan a Memory Capsule for my daughter's graduation?,"I would be thrilled to help you shape this wonderful graduation chapter into an unforgettable digital keepsake! 
 
 Here is a creative story plan designed around the Memory Capsule package, featuring up to 60 photos and 3 voice recordings:
@@ -76,4 +76,4 @@ Here is a creative story plan designed around the Memory Capsule package, featur
    - Recording 2: A clip of her best friend sharing a funny high school memory and cheering her on.
    - Recording 3: Her own brief voice note recorded on graduation day, capturing her dreams for the future.
 
-Which of these photo ideas or interview moments feels most exciting to you, or would you like to tweak any of the chapters before we begin?",,,
+Which of these photo ideas or interview moments feels most exciting to you, or would you like to tweak any of the chapters before we begin?",5,5,"Best answer in the set: photo split sums to 60, uses all 3 recordings. Assumes high school (could be university). Price/timeline not mentioned."

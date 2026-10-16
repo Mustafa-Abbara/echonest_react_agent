@@ -82,7 +82,7 @@ every stage gate.
 | 2.4 | ≥ 1 worked example inside the instructions | one full trajectory (an Event Story question, deliberately not a live test case), built from the real tool output | the example parses with `parse_react()` (5) | ✅ |
 | 2.4 | Persona and instructions don't conflict | length/tone only in personas; rules only in instructions | lint tests both ways (5); a live conflict (Milo) found and fixed | ✅ |
 | 1, 2.5 | Evaluate which agent + configuration worked best | scored comparison on the eval set | notebook §7–8, README Results (10) | ✅ |
-| 2.5 | Five reflection questions | notebook §8, each claim citing a plan and run ids | `react_agent.ipynb` (10); human ratings pending | ✅ |
+| 2.5 | Five reflection questions | notebook §8, each claim citing a plan and run ids | `react_agent.ipynb` (10); human ratings in `experiments/ratings/` | ✅ |
 | 1 | Final deliverable works as an assistant | Gradio app with persona selector (`app.py` over `agent.respond()`) | M1–M2 for every persona (6): `docs/evidence/stage6_live_chat.jsonl`, UI screenshots 09–11; final screenshots (12) | ✅ |
 | (user) | Switching model/provider needs no code change | config + capability files + LLM layer; grep test | switch drill (1, 11) | ⏳ |
 
@@ -904,8 +904,9 @@ Run G1, G2 and G5 three times each.
 - `README.md` rewritten for A4, with a checklist mapping every PDF grading item to a section and its evidence.
 - Found while checking the reflection: one scoring false negative (`p_flash:milo-flash:A2:0`: correct French "entre 5
   et 10 jours", but the frozen pattern only accepts "5 à 10"); documented instead of editing the frozen eval set.
-- Pending from the user: the 30 human ratings in `experiments/ratings/ratings_sample_flash.csv` (the notebook shows
-  them once filled in). Charts: none (matplotlib is not installed; the tables carry the comparison).
+- Human ratings (30 answers, by the author): Milo helpfulness 4.6 / persona fit 4.7, Nora 4.4 / 4.9, Sami 4.5 / 3.9; in
+  the notebook §7.6 and §8. They caught a reply Milo's max_tokens 400 cut off (`p_flash:milo-flash:L1:0`). Charts: none
+  (matplotlib is not installed; the tables carry the comparison).
 
 ---
 

@@ -81,6 +81,7 @@ instructions; tests check both directions.
 |---|---|
 | **Model type matters most**: Flash-Lite 85–94% task success, qwen3:4b-instruct 59–62% (it skips lookups) | `personas_by_model`, `model_type_core` |
 | **Best persona on the shipped model: Milo** (32/34); voices differ clearly (Sami's answers twice as long) | `p_flash` |
+| Human ratings (30 answers): Milo most helpful (4.6), Nora most in character (4.9), Sami least consistent (3.9: strong on plans, flat on prices) | `experiments/ratings/` |
 | **Prompt traits set the voice; live sampling settings add variety** (Sami vs Nora distinct-2: +0.02 on Flash-Lite, +0.09 on qwen) | `personas_by_model` |
 | Temperature 0, top-p 0.3 and top-k 1 gave **identical** runs (greedy decoding); temperature 1.4 was the worst | `s_qwen` |
 | High reasoning failed at max_tokens 400 (5/12: thinking used the budget) and passed at 1200 (12/12) | `s_flash` |
@@ -120,7 +121,8 @@ for t in tests/test_*.py; do python "$t" > /dev/null || echo "FAILED: $t"; done
   within the measured noise.
 - Two models; the local one is slow (about 14 s per turn) and its results are committed as evidence.
 - Automatic scoring uses fixed patterns and can miss a correct answer (one known false negative, documented in the
-  notebook §9); human ratings cover 30 answers.
+  notebook §9); human ratings cover 30 answers by one rater (the author).
+- Milo's max_tokens 400 is tight: once his hidden reasoning used 309 tokens and cut a reply (about 800 would be safer).
 - The free tier allows 500 Flash-Lite requests a day; the experiments took two quota days.
 
 ## Key safety
